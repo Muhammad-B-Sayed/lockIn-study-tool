@@ -227,6 +227,9 @@
   line-height: 0.96;
   margin: 0.6rem 0 0;
   color: #fff3e1;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .section-nav {
@@ -508,21 +511,38 @@
 }
 
 .settings-grid {
+  align-items: start;
   grid-template-columns: 1fr 1fr;
 }
 
+.settings-main {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
 .compact {
+  align-self: start;
   align-content: start;
 }
 
 .danger-box {
+  align-self: start;
+  display: grid;
+  align-content: start;
+  gap: 0.85rem;
   border-radius: 1.2rem;
   border: 1px solid rgba(171, 63, 31, 0.16);
   background: rgba(255, 243, 239, 0.8);
-  padding: 1.2rem;
+  padding: 0.85rem 1.2rem 1.2rem;
+}
+
+.danger-box p {
+  margin: 0;
 }
 
 .danger-button {
+  margin-top: 0.5rem;
   background: #ab3f1f;
   color: #fff7ef;
 }

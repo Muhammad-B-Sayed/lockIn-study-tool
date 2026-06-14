@@ -986,30 +986,32 @@ function WorkspaceScreen({
         </section>
 
         <section className="panel settings-panel" id="settings">
-          <div className="panel-heading">
-            <div>
-              <p className="panel-kicker">Account</p>
-              <h3>Manage your profile</h3>
-            </div>
-          </div>
-
           <div className="settings-grid">
-            <form className="stack-form compact" onSubmit={onChangePassword}>
-              <label>
-                New password
-                <input
-                  autoComplete="new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(event) => onNewPasswordChange(event.target.value)}
-                  placeholder="Set a new password"
-                  required
-                />
-              </label>
-              <button className="primary-button" type="submit">
-                Update password
-              </button>
-            </form>
+            <div className="settings-main">
+              <div className="panel-heading">
+                <div>
+                  <p className="panel-kicker">Account</p>
+                  <h3>Manage your profile</h3>
+                </div>
+              </div>
+
+              <form className="stack-form compact" onSubmit={onChangePassword}>
+                <label>
+                  New password
+                  <input
+                    autoComplete="new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(event) => onNewPasswordChange(event.target.value)}
+                    placeholder="Set a new password"
+                    required
+                  />
+                </label>
+                <button className="primary-button" type="submit">
+                  Update password
+                </button>
+              </form>
+            </div>
 
             <div className="danger-box">
               <h4>Danger zone</h4>

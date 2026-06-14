@@ -9,10 +9,3 @@ frontend/*.local
 # Backend
 backend/.local/
 backend/*.log
-
-# Legacy Java app
-team-project/target/
-team-project/build/
-
-# Backup for old nested git metadata
-team-project/.git-legacy-backup/
