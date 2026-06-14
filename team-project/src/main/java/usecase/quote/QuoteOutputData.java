@@ -1,0 +1,19 @@
+package usecase.quote;
+
+public class QuoteOutputData {
+    private final String content;
+    private final String author;
+
+    public QuoteOutputData(String content, String author) {
+        this.content = content;
+        this.author = author;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+}
