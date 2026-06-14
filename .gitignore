@@ -9,3 +9,4 @@ frontend/*.local
 # Backend
 backend/.local/
 backend/*.log
+backend/target/

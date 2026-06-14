@@ -138,9 +138,22 @@ export function createCalendarEvent(input: CalendarEventRequest) {
   })
 }
 
+export function updateCalendarEvent(eventId: string, input: CalendarEventRequest) {
+  return request<CalendarItem>(`/me/calendar/events/${eventId}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  })
+}
+
 export function markCalendarEventComplete(eventId: string) {
   return request<CalendarItem>(`/me/calendar/events/${eventId}/complete`, {
     method: 'PATCH',
+  })
+}
+
+export async function deleteCalendarEvent(eventId: string) {
+  await request<void>(`/me/calendar/events/${eventId}`, {
+    method: 'DELETE',
   })
 }
 

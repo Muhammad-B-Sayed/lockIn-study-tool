@@ -40,6 +40,7 @@
 
 .intro-copy,
 .auth-subtitle,
+.panel-copy,
 .signal-card p,
 .metric-card p,
 .quote-card p,
@@ -173,6 +174,12 @@
   gap: 1rem;
 }
 
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .primary-button,
 .ghost-button,
 .danger-button,
@@ -277,6 +284,10 @@
 .banner {
   justify-content: space-between;
   align-items: center;
+}
+
+.panel-heading {
+  gap: 1rem;
 }
 
 .status-pill {
@@ -455,17 +466,98 @@
   min-width: 10rem;
 }
 
+.calendar-heading {
+  align-items: flex-start;
+}
+
+.calendar-toolbar {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: end;
+}
+
+.month-stepper,
+.calendar-weekdays,
+.agenda-item-header,
+.agenda-actions {
+  display: flex;
+}
+
+.month-stepper {
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.month-stepper button,
+.agenda-actions button {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 0.68rem 0.95rem;
+  background: rgba(8, 36, 67, 0.08);
+  color: var(--ink);
+  transition:
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.month-stepper button:hover,
+.agenda-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.calendar-weekdays {
+  margin-top: 1rem;
+  gap: 0.75rem;
+}
+
+.calendar-weekdays span {
+  flex: 1;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .calendar-grid {
   margin-top: 1rem;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: stretch;
 }
 
 .calendar-cell {
-  min-height: 11.5rem;
+  width: 100%;
+  min-height: 10.75rem;
   border-radius: 1.2rem;
   background: rgba(255, 255, 255, 0.72);
   padding: 0.9rem;
   border: 1px solid rgba(8, 36, 67, 0.08);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.calendar-cell:hover {
+  transform: translateY(-1px);
+  border-color: rgba(8, 36, 67, 0.14);
+}
+
+.calendar-cell.today {
+  border-color: rgba(239, 123, 69, 0.36);
+}
+
+.calendar-cell.selected {
+  border-color: rgba(8, 36, 67, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(8, 36, 67, 0.18);
 }
 
 .calendar-cell.muted {
@@ -508,6 +600,117 @@
 
 .calendar-pill.completed {
   opacity: 0.58;
+}
+
+.calendar-more,
+.agenda-count,
+.agenda-kind,
+.agenda-status,
+.selected-date-banner span {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.calendar-more,
+.agenda-count,
+.selected-date-banner span {
+  color: var(--navy);
+  background: rgba(16, 41, 63, 0.08);
+}
+
+.selected-date-banner {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1.1rem;
+  background: rgba(16, 41, 63, 0.05);
+  border: 1px solid rgba(8, 36, 67, 0.08);
+}
+
+.selected-date-banner strong {
+  color: var(--ink);
+}
+
+.subtle-button {
+  background: rgba(8, 36, 67, 0.08);
+  border: 1px solid rgba(8, 36, 67, 0.1);
+  color: var(--ink);
+}
+
+.agenda-panel {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.agenda-heading {
+  align-items: flex-start;
+}
+
+.agenda-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.agenda-item {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(8, 36, 67, 0.08);
+}
+
+.agenda-item-header {
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.agenda-kind {
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--pill-accent) 12%, white), white);
+  border: 1px solid color-mix(in srgb, var(--pill-accent) 35%, white);
+}
+
+.agenda-kind.event {
+  --pill-accent: #ef7b45;
+}
+
+.agenda-kind.task {
+  --pill-accent: #2563eb;
+}
+
+.agenda-status {
+  color: #20563b;
+  background: rgba(42, 123, 80, 0.12);
+}
+
+.agenda-item h5 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.agenda-item p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.agenda-actions {
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.agenda-actions .danger-link {
+  background: rgba(171, 63, 31, 0.1);
+  color: #ab3f1f;
 }
 
 .settings-grid {
@@ -589,7 +792,7 @@
   }
 
   .calendar-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -613,6 +816,16 @@
   .banner {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .calendar-weekdays {
+    display: none;
+  }
+
+  .calendar-toolbar,
+  .month-stepper {
+    justify-items: stretch;
+    justify-content: flex-start;
   }
 
   .task-card-meta {
