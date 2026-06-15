@@ -74,8 +74,8 @@ describe('App login flow', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByRole('heading', { name: /waking up your workspace/i })).toBeInTheDocument()
-    expect(screen.getByText(/hold tight while the workspace comes back online/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /getting your workspace ready/i })).toBeInTheDocument()
+    expect(screen.getByText(/hold tight while we get everything in place/i)).toBeInTheDocument()
 
     if (resolveHealthCheck) {
       resolveHealthCheck({
