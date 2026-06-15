@@ -38,22 +38,6 @@ Stop the local database:
 ./scripts/stop-postgres.sh
 ```
 
-## Deploy on Render
-
-The repo now includes [render.yaml](../render.yaml) for the backend service.
-
-Set these values in Render:
-
-- `SPRING_DATASOURCE_URL`
-  Use a JDBC PostgreSQL URL, for example `jdbc:postgresql://host:5432/database`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `JWT_SECRET`
-- `FRONTEND_ORIGINS`
-  Set this to your frontend origin, for example `https://lockin-study-tool.vercel.app`
-
-Render provides `PORT` automatically, and the backend now reads that directly.
-
 ## Current endpoints
 
 - `POST /api/auth/signup`
