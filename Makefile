@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: bootstrap dev stop test build lint dev-backend dev-frontend dev-db stop-db backend-test frontend-test
+.PHONY: bootstrap dev stop test build lint dev-backend dev-frontend dev-db stop-db backend-test frontend-test docker-up docker-down
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -38,3 +38,9 @@ backend-test:
 
 frontend-test:
 	cd frontend && npm test
+
+docker-up:
+	docker compose up --build
+
+docker-down:
+	docker compose down --remove-orphans

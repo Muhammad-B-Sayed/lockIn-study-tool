@@ -115,6 +115,26 @@ class ApiSecurityTest {
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://127.0.0.1:5173"));
     }
 
+    @Test
+    void preflightAllowsLocalPreviewOrigin() throws Exception {
+        mockMvc.perform(options("/api/auth/signup")
+                        .header("Origin", "http://localhost:4173")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "content-type"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:4173"));
+    }
+
+    @Test
+    void preflightAllowsAlternateLocalDevPort() throws Exception {
+        mockMvc.perform(options("/api/auth/signup")
+                        .header("Origin", "http://127.0.0.1:5174")
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "content-type"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://127.0.0.1:5174"));
+    }
+
     @TestConfiguration
     static class TestSecurityConfig {
 

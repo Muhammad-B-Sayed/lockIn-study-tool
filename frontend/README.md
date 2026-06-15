@@ -2,7 +2,7 @@
 
 Web client for the LockIn workspace.
 
-For the full project setup flow, start with the root [README.md](/Users/muhammad/Random_Projects/Java_team_project/README.md:1).
+For the full project setup flow, start with the root [README.md](../README.md).
 
 ## Requirements
 

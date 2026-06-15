@@ -20,10 +20,10 @@
     radial-gradient(circle at top left, rgba(239, 123, 69, 0.2), transparent 38%),
     linear-gradient(145deg, rgba(8, 36, 67, 0.92), rgba(21, 61, 88, 0.96));
   color: #f8f3e8;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 2rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-content: stretch;
+  gap: 1.5rem;
 }
 
 .eyebrow,
@@ -42,12 +42,218 @@
 .auth-subtitle,
 .panel-copy,
 .signal-card p,
+.preview-row p,
+.preview-stat p,
 .metric-card p,
 .quote-card p,
 .due-card p,
 .empty-state p,
 .danger-box p {
   color: var(--muted);
+}
+
+.intro-copy-block {
+  max-width: 44rem;
+}
+
+.intro-copy-block h1 {
+  margin-bottom: 0.85rem;
+}
+
+.intro-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(14rem, 0.8fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.preview-board,
+.preview-stat,
+.signal-card {
+  border: 1px solid rgba(248, 243, 232, 0.14);
+  background: rgba(248, 243, 232, 0.06);
+  backdrop-filter: blur(18px);
+}
+
+.preview-board {
+  border-radius: 1.75rem;
+  padding: 1.35rem;
+  display: grid;
+  gap: 1.1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.preview-board-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.preview-board-header h2 {
+  margin: 0.45rem 0 0;
+  font-size: clamp(1.2rem, 2vw, 1.65rem);
+  color: #fff4e6;
+  max-width: 26rem;
+}
+
+.preview-label,
+.preview-month-heading span {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.69rem;
+  font-weight: 700;
+  color: rgba(255, 238, 220, 0.7);
+}
+
+.preview-chip {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(239, 123, 69, 0.16);
+  color: #ffd6bb;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.preview-board-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(13rem, 0.9fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.preview-lane,
+.preview-month-card,
+.preview-stat {
+  border-radius: 1.45rem;
+}
+
+.preview-lane {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.preview-row,
+.preview-month-card {
+  border: 1px solid rgba(248, 243, 232, 0.11);
+  background: rgba(8, 25, 40, 0.26);
+}
+
+.preview-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.95rem 1rem;
+  border-radius: 1.25rem;
+}
+
+.preview-row strong,
+.preview-month-heading strong,
+.preview-stat strong {
+  color: #fff4e6;
+}
+
+.preview-row strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.preview-row p,
+.preview-stat p {
+  margin: 0;
+  color: rgba(248, 243, 232, 0.64);
+}
+
+.preview-row span {
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(248, 243, 232, 0.08);
+  color: #fff1df;
+  font-size: 0.78rem;
+}
+
+.preview-dot {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 999px;
+}
+
+.preview-dot.assignment {
+  background: #ef7b45;
+}
+
+.preview-dot.event {
+  background: #5bc0be;
+}
+
+.preview-dot.reading {
+  background: #f2c078;
+}
+
+.preview-month-card {
+  padding: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.preview-month-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.preview-weekdays,
+.preview-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.preview-weekdays span,
+.preview-day {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 0.8rem;
+}
+
+.preview-weekdays span {
+  color: rgba(248, 243, 232, 0.55);
+  font-size: 0.72rem;
+}
+
+.preview-day {
+  font-size: 0.82rem;
+  color: rgba(248, 243, 232, 0.75);
+  background: rgba(248, 243, 232, 0.04);
+}
+
+.preview-day.active {
+  background: rgba(239, 123, 69, 0.2);
+  color: #fff4e6;
+  box-shadow: inset 0 0 0 1px rgba(255, 212, 182, 0.25);
+}
+
+.preview-rail {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.preview-stat {
+  padding: 1.15rem;
+}
+
+.preview-stat span,
+.signal-card span {
+  color: #ffb27e;
+}
+
+.preview-stat strong {
+  display: block;
+  margin: 0.85rem 0 0.45rem;
+  font-size: 1.05rem;
 }
 
 .signal-grid {
@@ -57,11 +263,8 @@
 }
 
 .signal-card {
-  border: 1px solid rgba(248, 243, 232, 0.18);
-  background: rgba(248, 243, 232, 0.06);
   border-radius: 1.5rem;
   padding: 1.35rem;
-  backdrop-filter: blur(18px);
 }
 
 .signal-card span {
@@ -209,6 +412,18 @@
   transform: translateY(-1px);
 }
 
+.primary-button:disabled,
+.ghost-button:disabled,
+.danger-button:disabled,
+.quote-meta button:disabled,
+.task-actions button:disabled,
+.banner button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+  box-shadow: none;
+}
+
 .workspace-shell {
   display: grid;
   grid-template-columns: 18.5rem minmax(0, 1fr);
@@ -234,9 +449,25 @@
   line-height: 0.96;
   margin: 0.6rem 0 0;
   color: #fff3e1;
+  max-width: 100%;
+  display: grid;
+  gap: 0.08em;
+}
+
+.sidebar-title-word,
+.sidebar-title-meta {
+  white-space: nowrap;
+}
+
+.sidebar-title-meta {
+  display: inline-flex;
+  gap: 0.3ch;
+  align-items: baseline;
+}
+
+.sidebar-title-user {
   overflow-wrap: anywhere;
   word-break: break-word;
-  max-width: 100%;
 }
 
 .section-nav {
@@ -961,6 +1192,8 @@
   .workspace-shell,
   .panel-grid,
   .hero-strip,
+  .intro-showcase,
+  .preview-board-body,
   .signal-grid,
   .due-grid,
   .settings-grid {
@@ -1001,6 +1234,12 @@
 
   .calendar-weekdays {
     display: none;
+  }
+
+  .preview-board-header,
+  .preview-month-heading {
+    flex-direction: column;
+    align-items: start;
   }
 
   .calendar-form-header,

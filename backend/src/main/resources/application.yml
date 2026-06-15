@@ -1,11 +1,11 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
 
 spring:
   application:
     name: lockin-backend
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:55432}/${DB_NAME:lockin}
+    url: ${SPRING_DATASOURCE_URL:${JDBC_DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:55432}/${DB_NAME:lockin}}}
     username: ${DB_USERNAME:lockin}
     password: ${DB_PASSWORD:lockin}
   jpa:
@@ -29,7 +29,7 @@ management:
 
 app:
   cors:
-    allowed-origins: ${FRONTEND_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+    allowed-origins: ${FRONTEND_ORIGINS:http://localhost:*,http://127.0.0.1:*}
   security:
     jwt:
       secret: ${JWT_SECRET:lockin-dev-secret-key-lockin-dev-secret-key}

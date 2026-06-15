@@ -2,7 +2,7 @@
 
 API and persistence services for the LockIn workspace.
 
-For the full project setup flow, start with the root [README.md](/Users/muhammad/Random_Projects/Java_team_project/README.md:1).
+For the full project setup flow, start with the root [README.md](../README.md).
 
 ## Requirements
 
@@ -37,6 +37,22 @@ Stop the local database:
 ```bash
 ./scripts/stop-postgres.sh
 ```
+
+## Deploy on Render
+
+The repo now includes [render.yaml](../render.yaml) for the backend service.
+
+Set these values in Render:
+
+- `SPRING_DATASOURCE_URL`
+  Use a JDBC PostgreSQL URL, for example `jdbc:postgresql://host:5432/database`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- `FRONTEND_ORIGINS`
+  Set this to your frontend origin, for example `https://lockin-study-tool.vercel.app`
+
+Render provides `PORT` automatically, and the backend now reads that directly.
 
 ## Current endpoints
 
