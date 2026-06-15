@@ -1,11 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import type { AuthSession, CalendarItem, DashboardSummary, Quote, Task } from './lib/types'
 
 const apiMocks = vi.hoisted(() => ({
+  checkBackendHealth: vi.fn(),
   login: vi.fn(),
   signup: vi.fn(),
   getQuote: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock('./lib/api', async () => {
     ...actual,
     loadStoredSession: () => null,
     persistSession: apiMocks.persistSession,
+    checkBackendHealth: apiMocks.checkBackendHealth,
     login: apiMocks.login,
     signup: apiMocks.signup,
     getQuote: apiMocks.getQuote,
@@ -42,9 +44,47 @@ vi.mock('./lib/api', async () => {
 })
 
 describe('App login flow', () => {
+  afterEach(() => {
+    cleanup()
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     window.localStorage.clear()
+    apiMocks.checkBackendHealth.mockResolvedValue({
+      status: 'UP',
+      service: 'lockin-backend',
+    })
+  })
+
+  it('shows a wake-up screen while the backend is still coming online', async () => {
+    let resolveHealthCheck:
+      | ((value: { status: string; service: string }) => void)
+      | undefined
+    apiMocks.checkBackendHealth.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveHealthCheck = resolve
+        }),
+    )
+
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByRole('heading', { name: /waking up your workspace/i })).toBeInTheDocument()
+    expect(screen.getByText(/hold tight while the workspace comes back online/i)).toBeInTheDocument()
+
+    if (resolveHealthCheck) {
+      resolveHealthCheck({
+        status: 'UP',
+        service: 'lockin-backend',
+      })
+    }
+
+    expect(await screen.findByLabelText(/username/i)).toBeInTheDocument()
   })
 
   it('signs in and renders the workspace overview', async () => {
@@ -92,8 +132,8 @@ describe('App login flow', () => {
       </MemoryRouter>,
     )
 
-    await userEvent.type(screen.getByLabelText(/username/i), 'muhammad')
-    await userEvent.type(screen.getByLabelText(/^password$/i), 'secret123')
+    await userEvent.type(await screen.findByLabelText(/username/i), 'muhammad')
+    await userEvent.type(await screen.findByLabelText(/^password$/i), 'secret123')
     await userEvent.click(screen.getByRole('button', { name: /enter workspace/i }))
 
     await waitFor(() => {
@@ -155,8 +195,8 @@ describe('App login flow', () => {
       </MemoryRouter>,
     )
 
-    await userEvent.type(screen.getByLabelText(/username/i), 'muhammad')
-    await userEvent.type(screen.getByLabelText(/^password$/i), 'secret123')
+    await userEvent.type(await screen.findByLabelText(/username/i), 'muhammad')
+    await userEvent.type(await screen.findByLabelText(/^password$/i), 'secret123')
     await userEvent.click(screen.getByRole('button', { name: /enter workspace/i }))
 
     expect(await screen.findByRole('button', { name: /edit event/i })).toBeInTheDocument()
@@ -223,8 +263,8 @@ describe('App login flow', () => {
       </MemoryRouter>,
     )
 
-    await userEvent.type(screen.getByLabelText(/username/i), 'muhammad')
-    await userEvent.type(screen.getByLabelText(/^password$/i), 'secret123')
+    await userEvent.type(await screen.findByLabelText(/username/i), 'muhammad')
+    await userEvent.type(await screen.findByLabelText(/^password$/i), 'secret123')
     await userEvent.click(screen.getByRole('button', { name: /enter workspace/i }))
 
     const editEventButtons = await screen.findAllByRole('button', { name: /edit event/i })
@@ -285,8 +325,8 @@ describe('App login flow', () => {
       </MemoryRouter>,
     )
 
-    await userEvent.type(screen.getByLabelText(/username/i), 'muhammad')
-    await userEvent.type(screen.getByLabelText(/^password$/i), 'secret123')
+    await userEvent.type(await screen.findByLabelText(/username/i), 'muhammad')
+    await userEvent.type(await screen.findByLabelText(/^password$/i), 'secret123')
     await userEvent.click(screen.getByRole('button', { name: /enter workspace/i }))
 
     const editTaskButtons = await screen.findAllByRole('button', { name: /edit task/i })

@@ -41,6 +41,11 @@ export type Quote = {
   author: string
 }
 
+export type HealthCheckResponse = {
+  status: string
+  service: string
+}
+
 export type SignupRequest = {
   username: string
   password: string

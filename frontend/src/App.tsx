@@ -2,6 +2,7 @@ import { startTransition, useDeferredValue, useEffect, useRef, useState } from '
 import { Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
 import {
+  checkBackendHealth,
   changePassword,
   createCalendarEvent,
   createTask,
@@ -76,9 +77,36 @@ const fullDateFormatter = new Intl.DateTimeFormat('en-CA', {
 
 const weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+const backendWakeMessages = [
+  {
+    title: 'Unlocking your workspace',
+    detail: 'Pulling the planner back online so your tasks and schedule are ready to load.',
+  },
+  {
+    title: 'Lining up due dates',
+    detail: 'Reconnecting the timeline that keeps upcoming deadlines visible.',
+  },
+  {
+    title: 'Restoring calendar flow',
+    detail: 'Bringing your saved events and study blocks back into view.',
+  },
+  {
+    title: 'Rebuilding focus lane',
+    detail: 'Getting the next-up work ready so the week opens with a clear path.',
+  },
+]
+
+type BackendWakeState = 'checking' | 'waking' | 'stalled'
+
 function App() {
   const today = getCurrentDateValue()
   const [authSession, setAuthSession] = useState<AuthSession | null>(() => loadStoredSession())
+  const [isBackendReady, setIsBackendReady] = useState(false)
+  const [backendWakeState, setBackendWakeState] = useState<BackendWakeState>('checking')
+  const [backendWakeElapsedSeconds, setBackendWakeElapsedSeconds] = useState(0)
+  const [backendWakeAttempts, setBackendWakeAttempts] = useState(0)
+  const [backendWakeMessageIndex, setBackendWakeMessageIndex] = useState(0)
+  const [backendWakeNonce, setBackendWakeNonce] = useState(0)
   const [authMode, setAuthMode] = useState<AuthMode>('login')
   const [authForm, setAuthForm] = useState<AuthFormState>({
     username: '',
@@ -122,6 +150,75 @@ function App() {
   const [isDeletingAccount, setIsDeletingAccount] = useState(false)
 
   const currentUser = authSession?.user ?? null
+
+  useEffect(() => {
+    let cancelled = false
+    let retryTimerId: number | null = null
+    const startedAt = Date.now()
+
+    const tickId = window.setInterval(() => {
+      if (!cancelled) {
+        setBackendWakeElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000))
+      }
+    }, 1000)
+
+    async function waitForBackend() {
+      let attempt = 0
+
+      while (!cancelled) {
+        attempt += 1
+        setBackendWakeAttempts(attempt)
+        setBackendWakeState(attempt === 1 ? 'checking' : 'waking')
+
+        try {
+          const health = await checkBackendHealth()
+          if (cancelled) {
+            return
+          }
+
+          if (health.status === 'UP') {
+            setIsBackendReady(true)
+            return
+          }
+        } catch {
+          if (cancelled) {
+            return
+          }
+        }
+
+        const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000)
+        if (elapsedSeconds >= 45) {
+          setBackendWakeState('stalled')
+        }
+
+        await new Promise<void>((resolve) => {
+          retryTimerId = window.setTimeout(resolve, 2500)
+        })
+      }
+    }
+
+    void waitForBackend()
+
+    return () => {
+      cancelled = true
+      window.clearInterval(tickId)
+      if (retryTimerId !== null) {
+        window.clearTimeout(retryTimerId)
+      }
+    }
+  }, [backendWakeNonce])
+
+  useEffect(() => {
+    if (isBackendReady) {
+      return
+    }
+
+    const rotationId = window.setInterval(() => {
+      setBackendWakeMessageIndex((current) => (current + 1) % backendWakeMessages.length)
+    }, 2800)
+
+    return () => window.clearInterval(rotationId)
+  }, [isBackendReady])
 
   useEffect(() => {
     persistSession(authSession)
@@ -615,6 +712,27 @@ function App() {
     setStatusMessage('Signed out.')
   }
 
+  function handleRetryBackendWake() {
+    setIsBackendReady(false)
+    setBackendWakeState('checking')
+    setBackendWakeElapsedSeconds(0)
+    setBackendWakeAttempts(0)
+    setBackendWakeMessageIndex(0)
+    setBackendWakeNonce((current) => current + 1)
+  }
+
+  if (!isBackendReady) {
+    return (
+      <BackendWakeScreen
+        wakeState={backendWakeState}
+        elapsedSeconds={backendWakeElapsedSeconds}
+        attempts={backendWakeAttempts}
+        message={backendWakeMessages[backendWakeMessageIndex]}
+        onRetry={handleRetryBackendWake}
+      />
+    )
+  }
+
   return (
     <Routes>
       <Route
@@ -696,6 +814,116 @@ function App() {
       />
       <Route path="*" element={<Navigate to={authSession ? '/app' : '/'} replace />} />
     </Routes>
+  )
+}
+
+type BackendWakeScreenProps = {
+  wakeState: BackendWakeState
+  elapsedSeconds: number
+  attempts: number
+  message: (typeof backendWakeMessages)[number]
+  onRetry: () => void
+}
+
+function BackendWakeScreen({
+  wakeState,
+  elapsedSeconds,
+  attempts,
+  message,
+  onRetry,
+}: BackendWakeScreenProps) {
+  const wakeLabel =
+    wakeState === 'checking'
+      ? 'Checking connection'
+      : wakeState === 'stalled'
+        ? 'Still waking up'
+        : 'Starting workspace'
+
+  const wakeTitle =
+    wakeState === 'stalled'
+      ? 'Your workspace is taking a little longer to come online.'
+      : 'Waking up your workspace'
+
+  const wakeCopy =
+    wakeState === 'stalled'
+      ? 'The backend is still spinning up after inactivity. Keep this page open and we will continue retrying automatically.'
+      : 'LockIn is reconnecting your API so tasks, quotes, and calendar data arrive together instead of trickling in half-loaded.'
+
+  return (
+    <main className="boot-shell">
+      <section className="boot-panel boot-panel-primary">
+        <div className="boot-copy-block">
+          <p className="eyebrow">LockIn</p>
+          <h1>{wakeTitle}</h1>
+          <p className="intro-copy">{wakeCopy}</p>
+        </div>
+
+        <div className="boot-preview">
+          <article className="boot-preview-card">
+            <div className="boot-preview-header">
+              <span className="preview-label">{wakeLabel}</span>
+              <div className="boot-status-pill">{elapsedSeconds}s elapsed</div>
+            </div>
+
+            <div className="boot-wave">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <div className="boot-message-card">
+              <strong>{message.title}</strong>
+              <p>{message.detail}</p>
+            </div>
+          </article>
+
+          <div className="boot-signal-grid">
+            <article className="signal-card">
+              <span>Wake cycle</span>
+              <h2>{Math.max(attempts, 1)} checks</h2>
+              <p>We keep retrying in the background until the API responds cleanly.</p>
+            </article>
+            <article className="signal-card">
+              <span>What happens next</span>
+              <h2>Auto-enter</h2>
+              <p>The app opens normally as soon as your backend reports ready.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="boot-panel boot-panel-secondary">
+        <div className="boot-card">
+          <p className="panel-kicker">Application loading</p>
+          <h2>Hold tight while the workspace comes back online.</h2>
+          <p className="auth-subtitle">
+            Render may need a short moment to restart the API after inactivity. This page keeps
+            the experience clean while that happens.
+          </p>
+
+          <div className="boot-progress-track" aria-hidden="true">
+            <span className="boot-progress-bar"></span>
+          </div>
+
+          <div className="boot-meta-grid">
+            <div className="boot-meta-card">
+              <span>Status</span>
+              <strong>{wakeLabel}</strong>
+            </div>
+            <div className="boot-meta-card">
+              <span>Retries</span>
+              <strong>{Math.max(attempts, 1)}</strong>
+            </div>
+          </div>
+
+          {wakeState === 'stalled' ? (
+            <button className="ghost-button" type="button" onClick={onRetry}>
+              Retry now
+            </button>
+          ) : null}
+        </div>
+      </section>
+    </main>
   )
 }
 
