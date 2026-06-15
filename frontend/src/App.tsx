@@ -79,20 +79,20 @@ const weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const backendWakeMessages = [
   {
-    title: 'Unlocking your workspace',
-    detail: 'Pulling the planner back online so your tasks and schedule are ready to load.',
+    title: 'Opening your workspace',
+    detail: 'Getting your planner ready so everything shows up together.',
   },
   {
     title: 'Lining up due dates',
-    detail: 'Reconnecting the timeline that keeps upcoming deadlines visible.',
+    detail: 'Bringing your upcoming deadlines back into view.',
   },
   {
-    title: 'Restoring calendar flow',
-    detail: 'Bringing your saved events and study blocks back into view.',
+    title: 'Restoring your calendar',
+    detail: 'Gathering your saved events and study blocks.',
   },
   {
-    title: 'Rebuilding focus lane',
-    detail: 'Getting the next-up work ready so the week opens with a clear path.',
+    title: 'Setting up your next steps',
+    detail: 'Making sure your most important work is easy to pick up.',
   },
 ]
 
@@ -834,20 +834,20 @@ function BackendWakeScreen({
 }: BackendWakeScreenProps) {
   const wakeLabel =
     wakeState === 'checking'
-      ? 'Checking connection'
+      ? 'Getting things ready'
       : wakeState === 'stalled'
-        ? 'Still waking up'
-        : 'Starting workspace'
+        ? 'Still getting things ready'
+        : 'Opening your workspace'
 
   const wakeTitle =
     wakeState === 'stalled'
-      ? 'Your workspace is taking a little longer to come online.'
-      : 'Waking up your workspace'
+      ? 'This is taking a little longer than usual.'
+      : 'Getting your workspace ready'
 
   const wakeCopy =
     wakeState === 'stalled'
-      ? 'The backend is still spinning up after inactivity. Keep this page open and we will continue retrying automatically.'
-      : 'LockIn is reconnecting your API so tasks, quotes, and calendar data arrive together instead of trickling in half-loaded.'
+      ? 'Hang tight for a moment. Keep this page open and we will keep trying for you.'
+      : 'We are pulling everything into place so your tasks, calendar, and progress load cleanly.'
 
   return (
     <main className="boot-shell">
@@ -881,12 +881,12 @@ function BackendWakeScreen({
             <article className="signal-card">
               <span>Wake cycle</span>
               <h2>{Math.max(attempts, 1)} checks</h2>
-              <p>We keep retrying in the background until the API responds cleanly.</p>
+              <p>We keep checking in the background until everything is ready.</p>
             </article>
             <article className="signal-card">
               <span>What happens next</span>
               <h2>Auto-enter</h2>
-              <p>The app opens normally as soon as your backend reports ready.</p>
+              <p>The app opens on its own as soon as your workspace is ready.</p>
             </article>
           </div>
         </div>
@@ -895,10 +895,10 @@ function BackendWakeScreen({
       <section className="boot-panel boot-panel-secondary">
         <div className="boot-card">
           <p className="panel-kicker">Application loading</p>
-          <h2>Hold tight while the workspace comes back online.</h2>
+          <h2>Hold tight while we get everything in place.</h2>
           <p className="auth-subtitle">
-            Render may need a short moment to restart the API after inactivity. This page keeps
-            the experience clean while that happens.
+            This can take a short moment, especially after some time away. We will keep things
+            moving and bring you in as soon as everything is ready.
           </p>
 
           <div className="boot-progress-track" aria-hidden="true">
