@@ -2,12 +2,6 @@
 
 LockIn is a full-stack study planning app built with a Spring Boot backend, a React frontend, and PostgreSQL persistence. It gives users one workspace for tasks, deadlines, calendar events, quotes, and account management.
 
-## Product Preview
-
-![Workspace dashboard](docs/screenshots/workspace-dashboard.png)
-
-![Calendar workflow](docs/screenshots/calendar-workflow.png)
-
 ## Stack
 
 - Backend: Java 21, Spring Boot 3, Spring Security, Spring Data JPA, Flyway
