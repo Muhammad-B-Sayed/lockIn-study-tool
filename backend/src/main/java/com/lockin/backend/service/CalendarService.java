@@ -64,11 +64,28 @@ public class CalendarService {
     }
 
     @Transactional
+    public CalendarItemResponse updateEvent(String username, UUID eventId, CreateCalendarEventRequest request) {
+        CalendarEvent event = calendarEventRepository.findByIdAndOwnerUsername(eventId, username)
+                .orElseThrow(() -> new com.lockin.backend.exception.NotFoundException("Calendar event not found."));
+        event.setName(request.name().trim());
+        event.setEventDate(request.date());
+        event.setColorHex(normalizeColor(request.colorHex()));
+        return toEventCalendarItem(event);
+    }
+
+    @Transactional
     public CalendarItemResponse markEventCompleted(String username, UUID eventId) {
         CalendarEvent event = calendarEventRepository.findByIdAndOwnerUsername(eventId, username)
                 .orElseThrow(() -> new com.lockin.backend.exception.NotFoundException("Calendar event not found."));
         event.setCompleted(true);
         return toEventCalendarItem(event);
+    }
+
+    @Transactional
+    public void deleteEvent(String username, UUID eventId) {
+        CalendarEvent event = calendarEventRepository.findByIdAndOwnerUsername(eventId, username)
+                .orElseThrow(() -> new com.lockin.backend.exception.NotFoundException("Calendar event not found."));
+        calendarEventRepository.delete(event);
     }
 
     private CalendarItemResponse toTaskCalendarItem(TaskItem task) {
@@ -96,7 +113,16 @@ public class CalendarService {
     }
 
     private String taskColor(String taskType) {
-        return "#2563eb";
+        if (taskType == null) {
+            return "#2563eb";
+        }
+
+        return switch (taskType.trim().toLowerCase()) {
+            case "assignment" -> "#d97706";
+            case "exam" -> "#dc2626";
+            case "project" -> "#0f766e";
+            default -> "#2563eb";
+        };
     }
 
     private String normalizeColor(String colorHex) {
