@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@WebMvcTest(controllers = {AuthController.class, TaskController.class})
+@WebMvcTest(controllers = {AuthController.class, TaskController.class, SystemController.class})
 @Import({SecurityConfig.class, WebConfig.class, ApiExceptionHandler.class, ApiSecurityTest.TestSecurityConfig.class})
 class ApiSecurityTest {
 
@@ -133,6 +133,14 @@ class ApiSecurityTest {
                         .header("Access-Control-Request-Headers", "content-type"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://127.0.0.1:5174"));
+    }
+
+    @Test
+    void healthEndpointIsPublic() throws Exception {
+        mockMvc.perform(get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.service").value("lockin-backend"));
     }
 
     @TestConfiguration

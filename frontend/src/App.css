@@ -1,14 +1,17 @@
 .landing-shell,
+.boot-shell,
 .workspace-shell {
   min-height: 100vh;
 }
 
-.landing-shell {
+.landing-shell,
+.boot-shell {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
 }
 
 .intro-panel,
+.boot-panel,
 .auth-panel,
 .workspace-sidebar,
 .workspace-main {
@@ -24,6 +27,25 @@
   grid-template-rows: auto minmax(0, 1fr) auto;
   align-content: stretch;
   gap: 1.5rem;
+}
+
+.boot-panel-primary {
+  background:
+    radial-gradient(circle at top left, rgba(239, 123, 69, 0.24), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(91, 192, 190, 0.12), transparent 26%),
+    linear-gradient(145deg, rgba(8, 36, 67, 0.94), rgba(21, 61, 88, 0.98));
+  color: #f8f3e8;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 1.5rem;
+}
+
+.boot-panel-secondary {
+  background:
+    radial-gradient(circle at top, rgba(239, 123, 69, 0.18), transparent 24%),
+    linear-gradient(180deg, #f9f4e8, #efe8d8);
+  display: grid;
+  place-items: center;
 }
 
 .eyebrow,
@@ -56,8 +78,17 @@
   max-width: 44rem;
 }
 
+.boot-copy-block {
+  max-width: 40rem;
+}
+
 .intro-copy-block h1 {
   margin-bottom: 0.85rem;
+}
+
+.boot-copy-block h1 {
+  margin-bottom: 0.85rem;
+  color: #fff4e6;
 }
 
 .intro-showcase {
@@ -67,12 +98,174 @@
   align-items: stretch;
 }
 
+.boot-preview {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
 .preview-board,
+.boot-preview-card,
 .preview-stat,
 .signal-card {
   border: 1px solid rgba(248, 243, 232, 0.14);
   background: rgba(248, 243, 232, 0.06);
   backdrop-filter: blur(18px);
+}
+
+.boot-preview-card {
+  border-radius: 1.75rem;
+  padding: 1.35rem;
+  display: grid;
+  gap: 1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.boot-preview-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.boot-status-pill {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(248, 243, 232, 0.1);
+  color: #fff3e1;
+  font-size: 0.82rem;
+}
+
+.boot-wave {
+  display: flex;
+  align-items: end;
+  gap: 0.6rem;
+  min-height: 4rem;
+}
+
+.boot-wave span {
+  width: 0.9rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f2c078, #ef7b45);
+  animation: bootPulse 1.4s ease-in-out infinite;
+}
+
+.boot-wave span:nth-child(1) {
+  height: 2rem;
+}
+
+.boot-wave span:nth-child(2) {
+  height: 3.4rem;
+  animation-delay: 140ms;
+}
+
+.boot-wave span:nth-child(3) {
+  height: 2.6rem;
+  animation-delay: 280ms;
+}
+
+.boot-message-card {
+  border: 1px solid rgba(248, 243, 232, 0.11);
+  background: rgba(8, 25, 40, 0.3);
+  border-radius: 1.35rem;
+  padding: 1rem 1.05rem;
+}
+
+.boot-message-card strong {
+  display: block;
+  color: #fff4e6;
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
+}
+
+.boot-message-card p {
+  margin: 0;
+  color: rgba(248, 243, 232, 0.7);
+}
+
+.boot-signal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.boot-card {
+  width: min(32rem, 100%);
+  padding: 1.8rem;
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background: rgba(255, 252, 246, 0.9);
+  box-shadow: 0 24px 60px rgba(8, 36, 67, 0.08);
+  display: grid;
+  gap: 1.15rem;
+}
+
+.boot-progress-track {
+  height: 0.85rem;
+  border-radius: 999px;
+  background: rgba(18, 51, 70, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.boot-progress-bar {
+  display: block;
+  width: 36%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--navy), #ef7b45);
+  animation: bootSlide 1.8s ease-in-out infinite;
+}
+
+.boot-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.boot-meta-card {
+  border: 1px solid rgba(8, 36, 67, 0.08);
+  border-radius: 1.1rem;
+  background: rgba(16, 41, 63, 0.03);
+  padding: 0.95rem 1rem;
+}
+
+.boot-meta-card span {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.boot-meta-card strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+@keyframes bootPulse {
+  0%,
+  100% {
+    transform: scaleY(0.72);
+    opacity: 0.62;
+  }
+
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bootSlide {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(320%);
+  }
 }
 
 .preview-board {
@@ -1189,11 +1382,13 @@
 
 @media (max-width: 1180px) {
   .landing-shell,
+  .boot-shell,
   .workspace-shell,
   .panel-grid,
   .hero-strip,
   .intro-showcase,
   .preview-board-body,
+  .boot-signal-grid,
   .signal-grid,
   .due-grid,
   .settings-grid {
@@ -1212,17 +1407,20 @@
 
 @media (max-width: 760px) {
   .intro-panel,
+  .boot-panel,
   .auth-panel,
   .workspace-sidebar,
   .workspace-main {
     padding: 1.25rem;
   }
 
+  .boot-meta-grid,
   .split-fields,
   .calendar-grid {
     grid-template-columns: 1fr;
   }
 
+  .boot-preview-header,
   .workspace-header,
   .panel-heading,
   .task-card,

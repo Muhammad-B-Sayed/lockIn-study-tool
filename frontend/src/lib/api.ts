@@ -4,6 +4,7 @@ import type {
   CalendarEventRequest,
   CalendarItem,
   DashboardSummary,
+  HealthCheckResponse,
   LoginRequest,
   Quote,
   SignupRequest,
@@ -159,4 +160,8 @@ export async function deleteCalendarEvent(eventId: string) {
 
 export function getQuote() {
   return request<Quote>('/quotes/random', undefined, { includeAuth: false })
+}
+
+export function checkBackendHealth() {
+  return request<HealthCheckResponse>('/health', undefined, { includeAuth: false })
 }
