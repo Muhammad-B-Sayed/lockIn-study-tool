@@ -841,7 +841,7 @@
 .task-card {
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.15rem;
+  padding: 0.9rem 1.15rem 1.15rem;
   border-radius: 1.25rem;
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(8, 36, 67, 0.08);
@@ -869,6 +869,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
+  margin-top: -0.08rem;
 }
 
 .task-card-meta {
