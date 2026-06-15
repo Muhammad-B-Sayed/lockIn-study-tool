@@ -2,6 +2,8 @@
 
 API and persistence services for the LockIn workspace.
 
+For the full project setup flow, start with the root [README.md](/Users/muhammad/Random_Projects/Java_team_project/README.md:1).
+
 ## Requirements
 
 - Java 21
@@ -50,5 +52,7 @@ Stop the local database:
 - `GET /api/me/dashboard/due-soon`
 - `GET /api/me/calendar?month=2026-06`
 - `POST /api/me/calendar/events`
+- `PUT /api/me/calendar/events/{eventId}`
 - `PATCH /api/me/calendar/events/{eventId}/complete`
+- `DELETE /api/me/calendar/events/{eventId}`
 - `GET /api/quotes/random`

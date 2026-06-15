@@ -1480,11 +1480,7 @@ function DatePickerField({
 }) {
   const todayValue = getCurrentDateValue()
   const [isOpen, setIsOpen] = useState(false)
-  const [pickerMonth, setPickerMonth] = useState((value || todayValue).slice(0, 7))
-
-  useEffect(() => {
-    setPickerMonth((value || todayValue).slice(0, 7))
-  }, [todayValue, value])
+  const [pickerMonth, setPickerMonth] = useState(() => (value || todayValue).slice(0, 7))
 
   return (
     <div className="date-picker-field">

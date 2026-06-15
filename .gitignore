@@ -1,10 +1,16 @@
 .DS_Store
+.idea/
+.local/
+*.log
+*.pid
+coverage/
 
 # Frontend
 frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
 frontend/*.local
+frontend/coverage/
 
 # Backend
 backend/.local/
