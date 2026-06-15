@@ -2,6 +2,8 @@
 
 API and persistence services for the LockIn workspace.
 
+For the full project setup flow, start with the root [README.md](../README.md).
+
 ## Requirements
 
 - Java 21
@@ -36,6 +38,22 @@ Stop the local database:
 ./scripts/stop-postgres.sh
 ```
 
+## Deploy on Render
+
+The repo now includes [render.yaml](../render.yaml) for the backend service.
+
+Set these values in Render:
+
+- `SPRING_DATASOURCE_URL`
+  Use a JDBC PostgreSQL URL, for example `jdbc:postgresql://host:5432/database`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- `FRONTEND_ORIGINS`
+  Set this to your frontend origin, for example `https://lockin-study-tool.vercel.app`
+
+Render provides `PORT` automatically, and the backend now reads that directly.
+
 ## Current endpoints
 
 - `POST /api/auth/signup`
@@ -50,5 +68,7 @@ Stop the local database:
 - `GET /api/me/dashboard/due-soon`
 - `GET /api/me/calendar?month=2026-06`
 - `POST /api/me/calendar/events`
+- `PUT /api/me/calendar/events/{eventId}`
 - `PATCH /api/me/calendar/events/{eventId}/complete`
+- `DELETE /api/me/calendar/events/{eventId}`
 - `GET /api/quotes/random`

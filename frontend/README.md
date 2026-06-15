@@ -2,6 +2,8 @@
 
 Web client for the LockIn workspace.
 
+For the full project setup flow, start with the root [README.md](../README.md).
+
 ## Requirements
 
 - Node.js 20+
@@ -42,6 +44,6 @@ VITE_API_BASE_URL=http://localhost:8080/api
 
 - Secure login and signup
 - Quote, due-soon, task list, and calendar dashboard
-- Task creation, completion toggling, and deletion
-- Manual calendar event creation and completion
+- Task creation, editing, completion toggling, filtering, and deletion
+- Calendar event creation, editing, completion, and deletion
 - Password change and account deletion controls

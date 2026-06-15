@@ -179,6 +179,69 @@ describe('App login flow', () => {
     })
   })
 
+  it('shows a clear error when saving event changes fails', async () => {
+    const session: AuthSession = {
+      accessToken: 'token-123',
+      tokenType: 'Bearer',
+      expiresAt: null,
+      user: {
+        id: 'user-1',
+        username: 'muhammad',
+        createdAt: null,
+      },
+    }
+
+    const today = new Date()
+    const todayValue = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+    const calendarItems: CalendarItem[] = [
+      {
+        id: 'event-1',
+        kind: 'EVENT',
+        name: 'Study sprint',
+        date: todayValue,
+        colorHex: '#ef7b45',
+        completed: false,
+        taskId: null,
+        course: null,
+      },
+    ]
+
+    apiMocks.login.mockResolvedValue(session)
+    apiMocks.getQuote.mockResolvedValue({
+      content: 'Keep going.',
+      author: 'LockIn',
+    })
+    apiMocks.getTasks.mockResolvedValue([])
+    apiMocks.getDashboard.mockResolvedValue({ tasks: [] })
+    apiMocks.getCalendarItems.mockResolvedValue(calendarItems)
+    apiMocks.updateCalendarEvent.mockRejectedValue(new Error('Unexpected server error.'))
+
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    )
+
+    await userEvent.type(screen.getByLabelText(/username/i), 'muhammad')
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'secret123')
+    await userEvent.click(screen.getByRole('button', { name: /enter workspace/i }))
+
+    const editEventButtons = await screen.findAllByRole('button', { name: /edit event/i })
+    expect(editEventButtons.length).toBeGreaterThan(0)
+
+    await userEvent.click(editEventButtons[0])
+
+    const nameInput = screen.getByDisplayValue('Study sprint')
+    await userEvent.clear(nameInput)
+    await userEvent.type(nameInput, 'Updated study sprint')
+    await userEvent.click(screen.getByRole('button', { name: /save event changes/i }))
+
+    expect(
+      await screen.findByText(/could not finish saving event changes\. unexpected server error\./i),
+    ).toBeInTheDocument()
+  })
+
   it('loads an existing task into edit mode and saves changes', async () => {
     const session: AuthSession = {
       accessToken: 'token-123',

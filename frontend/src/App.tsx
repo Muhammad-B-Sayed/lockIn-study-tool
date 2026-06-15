@@ -115,6 +115,11 @@ function App() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isLoadingWorkspace, setIsLoadingWorkspace] = useState(false)
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false)
+  const [isRefreshingQuote, setIsRefreshingQuote] = useState(false)
+  const [isSubmittingTask, setIsSubmittingTask] = useState(false)
+  const [isSubmittingEvent, setIsSubmittingEvent] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false)
 
   const currentUser = authSession?.user ?? null
 
@@ -162,7 +167,7 @@ function App() {
           setDashboard({ tasks: [] })
           setErrorMessage('Your session ended. Please sign in again.')
         } else {
-          setErrorMessage(message)
+          setErrorMessage(formatActionError('loading the workspace', error))
         }
       } finally {
         if (!cancelled) {
@@ -192,10 +197,14 @@ function App() {
   })
 
   async function refreshQuote() {
+    setIsRefreshingQuote(true)
+    setErrorMessage(null)
     try {
       setQuote(await getQuote())
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(formatActionError('refreshing the quote', error))
+    } finally {
+      setIsRefreshingQuote(false)
     }
   }
 
@@ -215,6 +224,7 @@ function App() {
     event.preventDefault()
     setIsSubmittingAuth(true)
     setErrorMessage(null)
+    setStatusMessage(null)
 
     try {
       const nextSession =
@@ -242,7 +252,9 @@ function App() {
           : `Signed in as ${nextSession.user.username}.`,
       )
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(
+        formatActionError(authMode === 'signup' ? 'creating your account' : 'signing in', error),
+      )
     } finally {
       setIsSubmittingAuth(false)
     }
@@ -250,6 +262,9 @@ function App() {
 
   async function handleSubmitTask(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setIsSubmittingTask(true)
+    setErrorMessage(null)
+    setStatusMessage(null)
 
     try {
       const payload = {
@@ -280,11 +295,16 @@ function App() {
       await refreshWorkspace()
       setStatusMessage(editingTaskId ? 'Task updated.' : 'Task added.')
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(
+        formatActionError(editingTaskId ? 'saving task changes' : 'saving the task', error),
+      )
+    } finally {
+      setIsSubmittingTask(false)
     }
   }
 
   async function handleToggleTask(task: Task) {
+    setErrorMessage(null)
     try {
       await updateTask(task.id, {
         title: task.title,
@@ -297,11 +317,14 @@ function App() {
       await refreshWorkspace()
       setStatusMessage(task.completed ? 'Task reopened.' : 'Task marked complete.')
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(
+        formatActionError(task.completed ? 'reopening the task' : 'completing the task', error),
+      )
     }
   }
 
   async function handleDeleteTask(taskId: string) {
+    setErrorMessage(null)
     try {
       await deleteTask(taskId)
       if (editingTaskId === taskId) {
@@ -317,7 +340,7 @@ function App() {
       await refreshWorkspace()
       setStatusMessage('Task removed.')
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(formatActionError('deleting the task', error))
     }
   }
 
@@ -352,6 +375,9 @@ function App() {
 
   async function handleSubmitEvent(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setIsSubmittingEvent(true)
+    setErrorMessage(null)
+    setStatusMessage(null)
 
     try {
       const nextMonth = eventForm.date.slice(0, 7)
@@ -382,11 +408,16 @@ function App() {
       }
       setStatusMessage(editingEventId ? 'Event updated.' : 'Event added to the calendar.')
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(
+        formatActionError(editingEventId ? 'saving event changes' : 'saving the event', error),
+      )
+    } finally {
+      setIsSubmittingEvent(false)
     }
   }
 
   async function handleCompleteEvent(eventId: string) {
+    setErrorMessage(null)
     try {
       await markCalendarEventComplete(eventId)
       if (editingEventId === eventId) {
@@ -395,7 +426,7 @@ function App() {
       await refreshWorkspace()
       setStatusMessage('Event marked complete.')
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(formatActionError('marking the event complete', error))
     }
   }
 
@@ -419,7 +450,7 @@ function App() {
       await refreshWorkspace()
       setStatusMessage('Event removed from the calendar.')
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(formatActionError('deleting the event', error))
     }
   }
 
@@ -513,6 +544,9 @@ function App() {
     if (!newPassword.trim()) {
       return
     }
+    setIsChangingPassword(true)
+    setErrorMessage(null)
+    setStatusMessage(null)
 
     try {
       const updatedUser = await changePassword(newPassword)
@@ -527,7 +561,9 @@ function App() {
       )
       setStatusMessage('Password updated.')
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(formatActionError('updating the password', error))
+    } finally {
+      setIsChangingPassword(false)
     }
   }
 
@@ -539,12 +575,18 @@ function App() {
       return
     }
 
+    setIsDeletingAccount(true)
+    setErrorMessage(null)
+    setStatusMessage(null)
+
     try {
       await deleteAccount()
       handleSignOut()
       setStatusMessage('Account deleted.')
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error))
+      setErrorMessage(formatActionError('deleting the account', error))
+    } finally {
+      setIsDeletingAccount(false)
     }
   }
 
@@ -615,6 +657,11 @@ function App() {
               statusMessage={statusMessage}
               errorMessage={errorMessage}
               isLoadingWorkspace={isLoadingWorkspace}
+              isRefreshingQuote={isRefreshingQuote}
+              isSubmittingTask={isSubmittingTask}
+              isSubmittingEvent={isSubmittingEvent}
+              isChangingPassword={isChangingPassword}
+              isDeletingAccount={isDeletingAccount}
               onTaskQueryChange={setTaskQuery}
               onMonthChange={handleMonthSelection}
               onSelectCalendarDate={handleSelectCalendarDate}
@@ -674,7 +721,7 @@ function AuthScreen({
   return (
     <main className="landing-shell">
       <section className="intro-panel">
-        <div>
+        <div className="intro-copy-block">
           <p className="eyebrow">LockIn</p>
           <h1>Keep tasks, deadlines, and key dates in one calm workspace.</h1>
           <p className="intro-copy">
@@ -683,21 +730,104 @@ function AuthScreen({
           </p>
         </div>
 
+        <div className="intro-showcase">
+          <article className="preview-board">
+            <div className="preview-board-header">
+              <div>
+                <span className="preview-label">This week at a glance</span>
+                <h2>Everything that needs your attention, already sorted.</h2>
+              </div>
+              <div className="preview-chip">3 focus items</div>
+            </div>
+
+            <div className="preview-board-body">
+              <div className="preview-lane">
+                <div className="preview-row">
+                  <div className="preview-dot assignment"></div>
+                  <div>
+                    <strong>Physics lab write-up</strong>
+                    <p>Due tomorrow at 5:00 PM</p>
+                  </div>
+                  <span>Drafting</span>
+                </div>
+                <div className="preview-row">
+                  <div className="preview-dot event"></div>
+                  <div>
+                    <strong>Group check-in</strong>
+                    <p>Calendar event for Wednesday</p>
+                  </div>
+                  <span>11:30</span>
+                </div>
+                <div className="preview-row">
+                  <div className="preview-dot reading"></div>
+                  <div>
+                    <strong>History reading block</strong>
+                    <p>Protected focus lane for tonight</p>
+                  </div>
+                  <span>90 min</span>
+                </div>
+              </div>
+
+              <div className="preview-month-card">
+                <div className="preview-month-heading">
+                  <span>Calendar view</span>
+                  <strong>June</strong>
+                </div>
+                <div className="preview-weekdays">
+                  {weekdayLabels.map((label) => (
+                    <span key={label}>{label[0]}</span>
+                  ))}
+                </div>
+                <div className="preview-days">
+                  {['24', '25', '26', '27', '28', '29', '30', '1', '2', '3', '4', '5', '6'].map(
+                    (day) => (
+                      <span
+                        key={day}
+                        className={day === '3' || day === '5' ? 'preview-day active' : 'preview-day'}
+                      >
+                        {day}
+                      </span>
+                    ),
+                  )}
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <div className="preview-rail">
+            <article className="preview-stat">
+              <span>01</span>
+              <strong>Task board</strong>
+              <p>Capture work quickly and keep the details attached to every task.</p>
+            </article>
+            <article className="preview-stat">
+              <span>02</span>
+              <strong>Calendar view</strong>
+              <p>Track important dates in one monthly view that stays easy to scan.</p>
+            </article>
+            <article className="preview-stat">
+              <span>03</span>
+              <strong>Focus lane</strong>
+              <p>Bring the most urgent work forward so your next step stays obvious.</p>
+            </article>
+          </div>
+        </div>
+
         <div className="signal-grid">
           <article className="signal-card">
-            <span>01</span>
-            <h2>Task board</h2>
-            <p>Capture work quickly and keep the details attached to every task.</p>
+            <span>Tasks due</span>
+            <h2>4 lined up</h2>
+            <p>See the next deadlines without bouncing between notes and tabs.</p>
           </article>
           <article className="signal-card">
-            <span>02</span>
-            <h2>Calendar view</h2>
-            <p>Track important dates in one monthly view that stays easy to scan.</p>
+            <span>Calendar events</span>
+            <h2>2 this week</h2>
+            <p>Keep meetings, reminders, and study blocks visible in the same flow.</p>
           </article>
           <article className="signal-card">
-            <span>03</span>
-            <h2>Focus lane</h2>
-            <p>Bring the most urgent work forward so your next step stays obvious.</p>
+            <span>Weekly focus</span>
+            <h2>One clear lane</h2>
+            <p>Move through the week with a tighter plan and less last-minute drift.</p>
           </article>
         </div>
       </section>
@@ -809,6 +939,11 @@ type WorkspaceScreenProps = {
   statusMessage: string | null
   errorMessage: string | null
   isLoadingWorkspace: boolean
+  isRefreshingQuote: boolean
+  isSubmittingTask: boolean
+  isSubmittingEvent: boolean
+  isChangingPassword: boolean
+  isDeletingAccount: boolean
   onTaskQueryChange: (value: string) => void
   onMonthChange: (value: string) => void
   onSelectCalendarDate: (value: string) => void
@@ -855,6 +990,11 @@ function WorkspaceScreen({
   statusMessage,
   errorMessage,
   isLoadingWorkspace,
+  isRefreshingQuote,
+  isSubmittingTask,
+  isSubmittingEvent,
+  isChangingPassword,
+  isDeletingAccount,
   onTaskQueryChange,
   onMonthChange,
   onSelectCalendarDate,
@@ -926,7 +1066,13 @@ function WorkspaceScreen({
       <aside className="workspace-sidebar">
         <div>
           <p className="eyebrow">LockIn</p>
-          <h1 className="sidebar-title">Workspace for {user.username}</h1>
+          <h1 className="sidebar-title">
+            <span className="sidebar-title-word">Workspace</span>
+            <span className="sidebar-title-meta">
+              <span className="sidebar-title-connector">for</span>
+              <span className="sidebar-title-user">{user.username}</span>
+            </span>
+          </h1>
         </div>
 
         <nav className="section-nav">
@@ -963,8 +1109,8 @@ function WorkspaceScreen({
           <article className="quote-card">
             <div className="quote-meta">
               <span>Today&rsquo;s quote</span>
-              <button type="button" onClick={() => void onRefreshQuote()}>
-                Refresh quote
+              <button disabled={isRefreshingQuote} type="button" onClick={() => void onRefreshQuote()}>
+                {isRefreshingQuote ? 'Refreshing...' : 'Refresh quote'}
               </button>
             </div>
             <blockquote>{quote.content}</blockquote>
@@ -1095,11 +1241,20 @@ function WorkspaceScreen({
               </label>
 
               <div className="form-actions">
-                <button className="primary-button" type="submit">
-                  {isEditingTask ? 'Save task changes' : 'Save task'}
+                <button className="primary-button" disabled={isSubmittingTask} type="submit">
+                  {isSubmittingTask
+                    ? 'Saving task...'
+                    : isEditingTask
+                      ? 'Save task changes'
+                      : 'Save task'}
                 </button>
                 {isEditingTask ? (
-                  <button className="ghost-button subtle-button" type="button" onClick={onCancelTaskEditing}>
+                  <button
+                    className="ghost-button subtle-button"
+                    disabled={isSubmittingTask}
+                    type="button"
+                    onClick={onCancelTaskEditing}
+                  >
                     Cancel edit
                   </button>
                 ) : null}
@@ -1223,11 +1378,20 @@ function WorkspaceScreen({
               </label>
 
               <div className="calendar-form-actions">
-                <button className="primary-button" type="submit">
-                  {isEditingEvent ? 'Save event changes' : 'Add event'}
+                <button className="primary-button" disabled={isSubmittingEvent} type="submit">
+                  {isSubmittingEvent
+                    ? 'Saving event...'
+                    : isEditingEvent
+                      ? 'Save event changes'
+                      : 'Add event'}
                 </button>
                 {isEditingEvent ? (
-                  <button className="ghost-button subtle-button" type="button" onClick={onCancelEventEditing}>
+                  <button
+                    className="ghost-button subtle-button"
+                    disabled={isSubmittingEvent}
+                    type="button"
+                    onClick={onCancelEventEditing}
+                  >
                     Cancel edit
                   </button>
                 ) : null}
@@ -1417,8 +1581,8 @@ function WorkspaceScreen({
                     required
                   />
                 </label>
-                <button className="primary-button" type="submit">
-                  Update password
+                <button className="primary-button" disabled={isChangingPassword} type="submit">
+                  {isChangingPassword ? 'Updating password...' : 'Update password'}
                 </button>
               </form>
             </div>
@@ -1426,8 +1590,13 @@ function WorkspaceScreen({
             <div className="danger-box">
               <h4>Danger zone</h4>
               <p>Deleting your account permanently removes all of your planning data.</p>
-              <button className="danger-button" type="button" onClick={() => void onDeleteAccount()}>
-                Delete account
+              <button
+                className="danger-button"
+                disabled={isDeletingAccount}
+                type="button"
+                onClick={() => void onDeleteAccount()}
+              >
+                {isDeletingAccount ? 'Deleting account...' : 'Delete account'}
               </button>
             </div>
           </div>
@@ -1480,11 +1649,7 @@ function DatePickerField({
 }) {
   const todayValue = getCurrentDateValue()
   const [isOpen, setIsOpen] = useState(false)
-  const [pickerMonth, setPickerMonth] = useState((value || todayValue).slice(0, 7))
-
-  useEffect(() => {
-    setPickerMonth((value || todayValue).slice(0, 7))
-  }, [todayValue, value])
+  const [pickerMonth, setPickerMonth] = useState(() => (value || todayValue).slice(0, 7))
 
   return (
     <div className="date-picker-field">
@@ -1664,6 +1829,12 @@ function formatDate(value: string | null) {
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Unexpected request failure.'
+}
+
+function formatActionError(action: string, error: unknown) {
+  const message = getErrorMessage(error)
+  const detail = message.endsWith('.') ? message : `${message}.`
+  return `Could not finish ${action}. ${detail}`
 }
 
 export default App
