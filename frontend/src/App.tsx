@@ -1,4 +1,4 @@
-import { startTransition, useDeferredValue, useEffect, useState } from 'react'
+import { startTransition, useDeferredValue, useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
 import {
@@ -92,6 +92,7 @@ function App() {
     course: '',
     type: 'Assignment',
   })
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [eventForm, setEventForm] = useState<EventFormState>({
     name: '',
     date: today,
@@ -247,28 +248,37 @@ function App() {
     }
   }
 
-  async function handleCreateTask(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmitTask(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     try {
-      await createTask({
+      const payload = {
         title: taskForm.title,
         description: taskForm.description,
         dueDate: taskForm.dueDate || null,
         course: taskForm.course,
-        completed: false,
+        completed: editingTaskId
+          ? (tasks.find((task) => task.id === editingTaskId)?.completed ?? false)
+          : false,
         type: taskForm.type,
-      } satisfies TaskRequest)
+      } satisfies TaskRequest
 
-      setTaskForm((current) => ({
-        ...current,
+      if (editingTaskId) {
+        await updateTask(editingTaskId, payload)
+      } else {
+        await createTask(payload)
+      }
+
+      setEditingTaskId(null)
+      setTaskForm({
         title: '',
         description: '',
         dueDate: '',
         course: '',
-      }))
+        type: 'Assignment',
+      })
       await refreshWorkspace()
-      setStatusMessage('Task added.')
+      setStatusMessage(editingTaskId ? 'Task updated.' : 'Task added.')
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error))
     }
@@ -294,11 +304,50 @@ function App() {
   async function handleDeleteTask(taskId: string) {
     try {
       await deleteTask(taskId)
+      if (editingTaskId === taskId) {
+        setEditingTaskId(null)
+        setTaskForm({
+          title: '',
+          description: '',
+          dueDate: '',
+          course: '',
+          type: 'Assignment',
+        })
+      }
       await refreshWorkspace()
       setStatusMessage('Task removed.')
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error))
     }
+  }
+
+  function handleEditTask(task: Task) {
+    setEditingEventId(null)
+    setEventForm((current) => ({
+      ...current,
+      name: '',
+      date: selectedDate,
+      colorHex: '#ef7b45',
+    }))
+    setEditingTaskId(task.id)
+    setTaskForm({
+      title: task.title,
+      description: task.description ?? '',
+      dueDate: task.dueDate ?? '',
+      course: task.course ?? '',
+      type: task.type,
+    })
+  }
+
+  function handleCancelTaskEditing() {
+    setEditingTaskId(null)
+    setTaskForm({
+      title: '',
+      description: '',
+      dueDate: '',
+      course: '',
+      type: 'Assignment',
+    })
   }
 
   async function handleSubmitEvent(event: React.FormEvent<HTMLFormElement>) {
@@ -386,6 +435,14 @@ function App() {
 
   function handleEditCalendarEvent(item: CalendarItem) {
     const nextMonth = item.date.slice(0, 7)
+    setEditingTaskId(null)
+    setTaskForm({
+      title: '',
+      description: '',
+      dueDate: '',
+      course: '',
+      type: 'Assignment',
+    })
     setEditingEventId(item.id)
     setSelectedDate(item.date)
     setEventForm({
@@ -417,13 +474,13 @@ function App() {
     }
 
     setSelectedDate(dateValue)
-    setEventForm((current) => ({
-      ...current,
-      date: dateValue,
-    }))
-    const nextMonth = dateValue.slice(0, 7)
-    if (nextMonth !== month) {
-      setMonth(nextMonth)
+      setEventForm((current) => ({
+        ...current,
+        date: dateValue,
+      }))
+      const nextMonth = dateValue.slice(0, 7)
+      if (nextMonth !== month) {
+        setMonth(nextMonth)
     }
   }
 
@@ -497,9 +554,17 @@ function App() {
     setTasks([])
     setDashboard({ tasks: [] })
     setCalendarItems([])
+    setEditingTaskId(null)
     setMonth(today.slice(0, 7))
     setSelectedDate(today)
     setEditingEventId(null)
+    setTaskForm({
+      title: '',
+      description: '',
+      dueDate: '',
+      course: '',
+      type: 'Assignment',
+    })
     setEventForm({
       name: '',
       date: today,
@@ -538,6 +603,7 @@ function App() {
               dashboard={dashboard}
               tasks={filteredTasks}
               allTasksCount={tasks.length}
+              editingTaskId={editingTaskId}
               calendarItems={calendarItems}
               month={month}
               selectedDate={selectedDate}
@@ -559,7 +625,9 @@ function App() {
               onEventFormChange={setEventForm}
               onNewPasswordChange={setNewPassword}
               onRefreshQuote={refreshQuote}
-              onCreateTask={handleCreateTask}
+              onSubmitTask={handleSubmitTask}
+              onEditTask={handleEditTask}
+              onCancelTaskEditing={handleCancelTaskEditing}
               onToggleTask={handleToggleTask}
               onDeleteTask={handleDeleteTask}
               onToggleCalendarTask={handleToggleCalendarTask}
@@ -729,6 +797,7 @@ type WorkspaceScreenProps = {
   dashboard: DashboardSummary
   tasks: Task[]
   allTasksCount: number
+  editingTaskId: string | null
   calendarItems: CalendarItem[]
   month: string
   selectedDate: string
@@ -750,7 +819,9 @@ type WorkspaceScreenProps = {
   onEventFormChange: React.Dispatch<React.SetStateAction<EventFormState>>
   onNewPasswordChange: (value: string) => void
   onRefreshQuote: () => Promise<void>
-  onCreateTask: (event: React.FormEvent<HTMLFormElement>) => Promise<void>
+  onSubmitTask: (event: React.FormEvent<HTMLFormElement>) => Promise<void>
+  onEditTask: (task: Task) => void
+  onCancelTaskEditing: () => void
   onToggleTask: (task: Task) => Promise<void>
   onDeleteTask: (taskId: string) => Promise<void>
   onToggleCalendarTask: (taskId: string) => Promise<void>
@@ -772,6 +843,7 @@ function WorkspaceScreen({
   dashboard,
   tasks,
   allTasksCount,
+  editingTaskId,
   calendarItems,
   month,
   selectedDate,
@@ -793,7 +865,9 @@ function WorkspaceScreen({
   onEventFormChange,
   onNewPasswordChange,
   onRefreshQuote,
-  onCreateTask,
+  onSubmitTask,
+  onEditTask,
+  onCancelTaskEditing,
   onToggleTask,
   onDeleteTask,
   onToggleCalendarTask,
@@ -813,6 +887,39 @@ function WorkspaceScreen({
   const selectedItems = sortCalendarItems(itemsByDate.get(selectedDate) ?? [])
   const today = getCurrentDateValue()
   const isEditingEvent = editingEventId !== null
+  const isEditingTask = editingTaskId !== null
+  const taskFormPanelRef = useRef<HTMLElement | null>(null)
+  const taskTitleInputRef = useRef<HTMLInputElement | null>(null)
+  const eventFormPanelRef = useRef<HTMLElement | null>(null)
+  const eventNameInputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    if (!isEditingTask) {
+      return
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      window.location.hash = 'tasks'
+      taskFormPanelRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+      taskTitleInputRef.current?.focus({ preventScroll: true })
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [isEditingTask])
+
+  useEffect(() => {
+    if (!isEditingEvent) {
+      return
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      window.location.hash = 'calendar'
+      eventFormPanelRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+      eventNameInputRef.current?.focus({ preventScroll: true })
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [isEditingEvent])
 
   return (
     <main className="workspace-shell">
@@ -910,18 +1017,19 @@ function WorkspaceScreen({
             </div>
           </article>
 
-          <article className="panel form-panel" id="tasks">
+          <article className="panel form-panel" id="tasks" ref={taskFormPanelRef}>
             <div className="panel-heading">
               <div>
                 <p className="panel-kicker">Capture work</p>
-                <h3>Add a task</h3>
+                <h3>{isEditingTask ? 'Edit task' : 'Add a task'}</h3>
               </div>
             </div>
 
-            <form className="stack-form" onSubmit={onCreateTask}>
+            <form className="stack-form" onSubmit={onSubmitTask}>
               <label>
                 Title
                 <input
+                  ref={taskTitleInputRef}
                   value={taskForm.title}
                   onChange={(event) =>
                     onTaskFormChange((current) => ({ ...current, title: event.target.value }))
@@ -949,11 +1057,12 @@ function WorkspaceScreen({
               <div className="split-fields">
                 <label>
                   Due date
-                  <input
-                    type="date"
+                  <DatePickerField
+                    allowClear
+                    placeholder="Choose a due date"
                     value={taskForm.dueDate}
-                    onChange={(event) =>
-                      onTaskFormChange((current) => ({ ...current, dueDate: event.target.value }))
+                    onChange={(value) =>
+                      onTaskFormChange((current) => ({ ...current, dueDate: value }))
                     }
                   />
                 </label>
@@ -985,9 +1094,16 @@ function WorkspaceScreen({
                 </select>
               </label>
 
-              <button className="primary-button" type="submit">
-                Save task
-              </button>
+              <div className="form-actions">
+                <button className="primary-button" type="submit">
+                  {isEditingTask ? 'Save task changes' : 'Save task'}
+                </button>
+                {isEditingTask ? (
+                  <button className="ghost-button subtle-button" type="button" onClick={onCancelTaskEditing}>
+                    Cancel edit
+                  </button>
+                ) : null}
+              </div>
             </form>
           </article>
         </section>
@@ -1031,6 +1147,9 @@ function WorkspaceScreen({
                   <div className="task-card-meta">
                     <strong>{formatDate(task.dueDate)}</strong>
                     <div className="task-actions">
+                      <button type="button" onClick={() => onEditTask(task)}>
+                        Edit task
+                      </button>
                       <button type="button" onClick={() => void onToggleTask(task)}>
                         {task.completed ? 'Reopen' : 'Complete'}
                       </button>
@@ -1049,9 +1168,13 @@ function WorkspaceScreen({
           </div>
         </section>
 
-        <section className="panel-grid">
-          <article className="panel form-panel" id="calendar">
-            <div className="panel-heading">
+        <section className="calendar-section">
+          <article
+            className="panel form-panel calendar-form-panel"
+            id="calendar"
+            ref={eventFormPanelRef}
+          >
+            <div className="calendar-form-header">
               <div>
                 <p className="panel-kicker">Plan ahead</p>
                 <h3>{isEditingEvent ? 'Edit calendar event' : 'Add a calendar event'}</h3>
@@ -1059,12 +1182,18 @@ function WorkspaceScreen({
                   Click any day in the calendar to prefill the date and keep your schedule tight.
                 </p>
               </div>
+
+              <div className="selected-date-banner compact">
+                <span>Selected day</span>
+                <strong>{formatFullDate(selectedDate)}</strong>
+              </div>
             </div>
 
-            <form className="stack-form" onSubmit={onSubmitEvent}>
-              <label>
+            <form className="calendar-form-grid" onSubmit={onSubmitEvent}>
+              <label className="calendar-field calendar-field-title">
                 Event name
                 <input
+                  ref={eventNameInputRef}
                   value={eventForm.name}
                   onChange={(event) =>
                     onEventFormChange((current) => ({ ...current, name: event.target.value }))
@@ -1074,40 +1203,28 @@ function WorkspaceScreen({
                 />
               </label>
 
-              <div className="split-fields">
-                <label>
-                  Date
-                  <input
-                    type="date"
-                    value={eventForm.date}
-                    onChange={(event) => onSelectCalendarDate(event.target.value)}
-                    required
-                  />
-                </label>
+              <label className="calendar-field">
+                Date
+                <DatePickerField value={eventForm.date} onChange={onSelectCalendarDate} />
+              </label>
 
-                <label>
-                  Accent color
-                  <input
-                    type="color"
-                    value={eventForm.colorHex}
-                    onChange={(event) =>
-                      onEventFormChange((current) => ({
-                        ...current,
-                        colorHex: event.target.value,
-                      }))
-                    }
-                  />
-                </label>
-              </div>
+              <label className="calendar-field">
+                Accent color
+                <input
+                  type="color"
+                  value={eventForm.colorHex}
+                  onChange={(event) =>
+                    onEventFormChange((current) => ({
+                      ...current,
+                      colorHex: event.target.value,
+                    }))
+                  }
+                />
+              </label>
 
-              <div className="selected-date-banner">
-                <span>Selected day</span>
-                <strong>{formatFullDate(selectedDate)}</strong>
-              </div>
-
-              <div className="form-actions">
+              <div className="calendar-form-actions">
                 <button className="primary-button" type="submit">
-                  {isEditingEvent ? 'Save changes' : 'Add event'}
+                  {isEditingEvent ? 'Save event changes' : 'Add event'}
                 </button>
                 {isEditingEvent ? (
                   <button className="ghost-button subtle-button" type="button" onClick={onCancelEventEditing}>
@@ -1118,7 +1235,7 @@ function WorkspaceScreen({
             </form>
           </article>
 
-          <article className="panel month-panel">
+          <article className="panel month-panel calendar-main-panel">
             <div className="panel-heading calendar-heading">
               <div>
                 <p className="panel-kicker">Calendar</p>
@@ -1346,6 +1463,112 @@ function EmptyState({ title, body }: { title: string; body: string }) {
     <div className="empty-state">
       <h4>{title}</h4>
       <p>{body}</p>
+    </div>
+  )
+}
+
+function DatePickerField({
+  value,
+  onChange,
+  allowClear = false,
+  placeholder = 'Choose a date',
+}: {
+  value: string
+  onChange: (value: string) => void
+  allowClear?: boolean
+  placeholder?: string
+}) {
+  const todayValue = getCurrentDateValue()
+  const [isOpen, setIsOpen] = useState(false)
+  const [pickerMonth, setPickerMonth] = useState((value || todayValue).slice(0, 7))
+
+  useEffect(() => {
+    setPickerMonth((value || todayValue).slice(0, 7))
+  }, [todayValue, value])
+
+  return (
+    <div className="date-picker-field">
+      <button
+        aria-expanded={isOpen}
+        className="date-picker-trigger"
+        type="button"
+        onClick={() => {
+          setPickerMonth((value || todayValue).slice(0, 7))
+          setIsOpen((current) => !current)
+        }}
+      >
+        <span>{value ? formatFullDate(value) : placeholder}</span>
+        <strong>{value || 'No date selected'}</strong>
+      </button>
+
+      {isOpen ? (
+        <div className="date-picker-popover">
+          <div className="date-picker-header">
+            <strong>{monthFormatter.format(parseMonthValue(pickerMonth))}</strong>
+            <div className="date-picker-controls">
+              <button type="button" onClick={() => setPickerMonth(shiftMonthValue(pickerMonth, -1))}>
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPickerMonth(todayValue.slice(0, 7))
+                  onChange(todayValue)
+                  setIsOpen(false)
+                }}
+              >
+                Today
+              </button>
+              {allowClear ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange('')
+                    setIsOpen(false)
+                  }}
+                >
+                  Clear
+                </button>
+              ) : null}
+              <button type="button" onClick={() => setPickerMonth(shiftMonthValue(pickerMonth, 1))}>
+                Next
+              </button>
+            </div>
+          </div>
+
+          <div className="date-picker-weekdays" aria-hidden="true">
+            {weekdayLabels.map((label) => (
+              <span key={label}>{label}</span>
+            ))}
+          </div>
+
+          <div className="date-picker-grid">
+            {buildMonthDays(pickerMonth).map((day) => {
+              const dayValue = toIsoDate(day)
+              return (
+                <button
+                  className={[
+                    'date-picker-day',
+                    day.inMonth ? '' : 'muted',
+                    dayValue === value ? 'selected' : '',
+                    dayValue === todayValue ? 'today' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  key={dayValue}
+                  type="button"
+                  onClick={() => {
+                    onChange(dayValue)
+                    setIsOpen(false)
+                  }}
+                >
+                  {day.date.getDate()}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

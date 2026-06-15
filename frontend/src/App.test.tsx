@@ -13,6 +13,7 @@ const apiMocks = vi.hoisted(() => ({
   getDashboard: vi.fn(),
   getCalendarItems: vi.fn(),
   persistSession: vi.fn(),
+  updateTask: vi.fn(),
   updateCalendarEvent: vi.fn(),
 }))
 
@@ -29,7 +30,7 @@ vi.mock('./lib/api', async () => {
     getDashboard: apiMocks.getDashboard,
     getCalendarItems: apiMocks.getCalendarItems,
     createTask: vi.fn(),
-    updateTask: vi.fn(),
+    updateTask: apiMocks.updateTask,
     deleteTask: vi.fn(),
     createCalendarEvent: vi.fn(),
     updateCalendarEvent: apiMocks.updateCalendarEvent,
@@ -167,13 +168,84 @@ describe('App login flow', () => {
     const nameInput = screen.getByDisplayValue('Study sprint')
     await userEvent.clear(nameInput)
     await userEvent.type(nameInput, 'Updated study sprint')
-    await userEvent.click(screen.getByRole('button', { name: /save changes/i }))
+    await userEvent.click(screen.getByRole('button', { name: /save event changes/i }))
 
     await waitFor(() => {
       expect(apiMocks.updateCalendarEvent).toHaveBeenCalledWith('event-1', {
         name: 'Updated study sprint',
         date: todayValue,
         colorHex: '#ef7b45',
+      })
+    })
+  })
+
+  it('loads an existing task into edit mode and saves changes', async () => {
+    const session: AuthSession = {
+      accessToken: 'token-123',
+      tokenType: 'Bearer',
+      expiresAt: null,
+      user: {
+        id: 'user-1',
+        username: 'muhammad',
+        createdAt: null,
+      },
+    }
+
+    const tasks: Task[] = [
+      {
+        id: 'task-1',
+        title: 'Finish CSC207 report',
+        description: 'Write the final summary',
+        dueDate: '2026-06-20',
+        course: 'CSC207',
+        completed: false,
+        type: 'Assignment',
+      },
+    ]
+
+    apiMocks.login.mockResolvedValue(session)
+    apiMocks.getQuote.mockResolvedValue({
+      content: 'Keep going.',
+      author: 'LockIn',
+    })
+    apiMocks.getTasks.mockResolvedValue(tasks)
+    apiMocks.getDashboard.mockResolvedValue({ tasks })
+    apiMocks.getCalendarItems.mockResolvedValue([])
+    apiMocks.updateTask.mockResolvedValue({
+      ...tasks[0],
+      title: 'Finish CSC207 final report',
+    })
+
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    )
+
+    await userEvent.type(screen.getByLabelText(/username/i), 'muhammad')
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'secret123')
+    await userEvent.click(screen.getByRole('button', { name: /enter workspace/i }))
+
+    const editTaskButtons = await screen.findAllByRole('button', { name: /edit task/i })
+    expect(editTaskButtons.length).toBeGreaterThan(0)
+
+    await userEvent.click(editTaskButtons[0])
+
+    expect(await screen.findByRole('heading', { name: /edit task/i })).toBeInTheDocument()
+
+    const titleInput = screen.getByDisplayValue('Finish CSC207 report')
+    await userEvent.clear(titleInput)
+    await userEvent.type(titleInput, 'Finish CSC207 final report')
+    await userEvent.click(screen.getByRole('button', { name: /save task changes/i }))
+
+    await waitFor(() => {
+      expect(apiMocks.updateTask).toHaveBeenCalledWith('task-1', {
+        title: 'Finish CSC207 final report',
+        description: 'Write the final summary',
+        dueDate: '2026-06-20',
+        course: 'CSC207',
+        completed: false,
+        type: 'Assignment',
       })
     })
   })

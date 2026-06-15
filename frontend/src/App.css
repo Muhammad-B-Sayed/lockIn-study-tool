@@ -373,6 +373,11 @@
   gap: 1rem;
 }
 
+.calendar-section {
+  display: grid;
+  gap: 1rem;
+}
+
 .due-grid,
 .task-list,
 .calendar-grid,
@@ -464,6 +469,178 @@
 .month-panel input[type='month'] {
   width: auto;
   min-width: 10rem;
+}
+
+.calendar-form-panel,
+.calendar-main-panel {
+  align-self: start;
+}
+
+.calendar-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.calendar-form-panel .panel-copy {
+  max-width: 40rem;
+  margin: 0.45rem 0 0;
+}
+
+.calendar-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(12rem, 0.85fr) minmax(12rem, 0.85fr) auto;
+  gap: 1rem;
+  align-items: end;
+  margin-top: 1rem;
+}
+
+.calendar-field {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--ink);
+  font-size: 0.94rem;
+}
+
+.calendar-field-title {
+  min-width: 0;
+}
+
+.date-picker-field {
+  position: relative;
+}
+
+.date-picker-trigger {
+  width: 100%;
+  border: 1px solid rgba(8, 36, 67, 0.14);
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.date-picker-trigger span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+.date-picker-trigger strong {
+  font-size: 1rem;
+}
+
+.date-picker-popover {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 0;
+  z-index: 10;
+  width: min(26rem, 88vw);
+  padding: 1rem;
+  border-radius: 1.35rem;
+  border: 1px solid rgba(8, 36, 67, 0.12);
+  background: rgba(255, 252, 246, 0.98);
+  box-shadow: 0 22px 50px rgba(8, 36, 67, 0.14);
+}
+
+.date-picker-header,
+.date-picker-controls,
+.date-picker-weekdays,
+.date-picker-grid {
+  display: grid;
+}
+
+.date-picker-header {
+  grid-template-columns: 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.date-picker-header strong {
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.date-picker-controls {
+  grid-auto-flow: column;
+  gap: 0.45rem;
+}
+
+.date-picker-controls button,
+.date-picker-day {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.date-picker-controls button {
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  background: rgba(8, 36, 67, 0.08);
+  color: var(--ink);
+}
+
+.date-picker-weekdays,
+.date-picker-grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.date-picker-weekdays {
+  margin-top: 1rem;
+}
+
+.date-picker-weekdays span {
+  text-align: center;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.date-picker-grid {
+  margin-top: 0.6rem;
+}
+
+.date-picker-day {
+  min-height: 2.8rem;
+  border-radius: 0.95rem;
+  background: rgba(16, 41, 63, 0.04);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.date-picker-day.today {
+  box-shadow: inset 0 0 0 1px rgba(239, 123, 69, 0.44);
+}
+
+.date-picker-day.selected {
+  background: linear-gradient(135deg, var(--navy), #215679);
+  color: #fff8ed;
+}
+
+.date-picker-day.muted {
+  opacity: 0.4;
+}
+
+.calendar-form-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.calendar-form-actions .primary-button,
+.calendar-form-actions .subtle-button {
+  box-shadow: none;
 }
 
 .calendar-heading {
@@ -626,7 +803,7 @@
 .selected-date-banner {
   display: grid;
   gap: 0.5rem;
-  padding: 0.95rem 1rem;
+  padding: 0.85rem 1rem;
   border-radius: 1.1rem;
   background: rgba(16, 41, 63, 0.05);
   border: 1px solid rgba(8, 36, 67, 0.08);
@@ -636,6 +813,10 @@
   color: var(--ink);
 }
 
+.selected-date-banner.compact {
+  min-width: 15rem;
+}
+
 .subtle-button {
   background: rgba(8, 36, 67, 0.08);
   border: 1px solid rgba(8, 36, 67, 0.1);
@@ -643,7 +824,7 @@
 }
 
 .agenda-panel {
-  margin-top: 1.25rem;
+  margin-top: 1rem;
   display: grid;
   gap: 1rem;
 }
@@ -822,9 +1003,20 @@
     display: none;
   }
 
+  .calendar-form-header,
+  .calendar-form-grid {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .calendar-form-header,
   .calendar-toolbar,
   .month-stepper {
     justify-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .calendar-form-actions {
     justify-content: flex-start;
   }
 
