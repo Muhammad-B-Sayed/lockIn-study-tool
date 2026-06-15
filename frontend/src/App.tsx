@@ -156,12 +156,6 @@ function App() {
     let retryTimerId: number | null = null
     const startedAt = Date.now()
 
-    setIsBackendReady(false)
-    setBackendWakeState('checking')
-    setBackendWakeElapsedSeconds(0)
-    setBackendWakeAttempts(0)
-    setBackendWakeMessageIndex(0)
-
     const tickId = window.setInterval(() => {
       if (!cancelled) {
         setBackendWakeElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000))
@@ -718,6 +712,15 @@ function App() {
     setStatusMessage('Signed out.')
   }
 
+  function handleRetryBackendWake() {
+    setIsBackendReady(false)
+    setBackendWakeState('checking')
+    setBackendWakeElapsedSeconds(0)
+    setBackendWakeAttempts(0)
+    setBackendWakeMessageIndex(0)
+    setBackendWakeNonce((current) => current + 1)
+  }
+
   if (!isBackendReady) {
     return (
       <BackendWakeScreen
@@ -725,7 +728,7 @@ function App() {
         elapsedSeconds={backendWakeElapsedSeconds}
         attempts={backendWakeAttempts}
         message={backendWakeMessages[backendWakeMessageIndex]}
-        onRetry={() => setBackendWakeNonce((current) => current + 1)}
+        onRetry={handleRetryBackendWake}
       />
     )
   }
