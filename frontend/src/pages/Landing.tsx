@@ -31,7 +31,6 @@ export default function Landing() {
 
   return (
     <div className="landing">
-      <div className="landing__lamp" aria-hidden />
       <header className="landing__top">
         <Wordmark size="lg" />
         <button type="button" className="landing__signin" aria-expanded={authOpen} onClick={() => setAuthOpen((o) => !o)}>

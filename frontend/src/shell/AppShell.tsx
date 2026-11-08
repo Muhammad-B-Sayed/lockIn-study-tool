@@ -29,7 +29,7 @@ export function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const [paletteOpen, setPaletteOpen] = useState(false)
-  const { pref, setPref } = useTheme()
+  const { setPref, resolved } = useTheme()
 
   const reviewCount = useMemo(() => (data ? rankReview(data.ws, now).length : 0), [data, now])
 
@@ -157,9 +157,11 @@ export function AppShell() {
               items={[
                 { label: 'Settings', icon: 'gear', onSelect: () => navigate('/app/settings') },
                 'separator',
-                { label: 'Dark', icon: 'moon', checked: pref === 'dark', onSelect: () => setPref('dark') },
-                { label: 'Light', icon: 'sun', checked: pref === 'light', onSelect: () => setPref('light') },
-                { label: 'Match system', icon: 'monitor', checked: pref === 'system', onSelect: () => setPref('system') },
+                {
+                  label: resolved === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
+                  icon: resolved === 'dark' ? 'sun' : 'moon',
+                  onSelect: () => setPref(resolved === 'dark' ? 'light' : 'dark'),
+                },
                 'separator',
                 {
                   label: user?.mode === 'demo' ? 'Leave demo' : 'Sign out',

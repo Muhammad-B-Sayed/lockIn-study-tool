@@ -1,7 +1,7 @@
 import { useId, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAccount, useAuth } from '../lib/data'
-import { useTheme, type ThemePref } from '../app/theme'
+import { useTheme } from '../app/theme'
 import { Button, Dialog, Field, Input, Segmented } from '../ui/primitives'
 import { errorMessage, useToast } from '../ui/toastContext'
 import { Kbd } from '../ui/primitives'
@@ -12,7 +12,7 @@ export default function Settings() {
   const account = useAccount()
   const toast = useToast()
   const navigate = useNavigate()
-  const { pref, setPref } = useTheme()
+  const { setPref, resolved } = useTheme()
   const [confirm, setConfirm] = useState<'delete' | 'reset' | null>(null)
   const [busy, setBusy] = useState(false)
   const demo = auth.state.status === 'signed-in' && auth.state.mode === 'demo'
@@ -42,15 +42,14 @@ export default function Settings() {
       </header>
 
       <div className="settings__list">
-        <Row title="Appearance" body="Night is the default: warm ink, one lamp. Day is the same desk in daylight.">
-          <Segmented<ThemePref>
+        <Row title="Appearance" body="Starts with your system setting. Pick one to keep it.">
+          <Segmented<'dark' | 'light'>
             label="Theme"
-            value={pref}
+            value={resolved}
             onChange={setPref}
             options={[
-              { value: 'dark', label: 'Night', icon: 'moon' },
-              { value: 'light', label: 'Day', icon: 'sun' },
-              { value: 'system', label: 'System', icon: 'monitor' },
+              { value: 'dark', label: 'Dark', icon: 'moon' },
+              { value: 'light', label: 'Light', icon: 'sun' },
             ]}
           />
         </Row>

@@ -65,20 +65,20 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: #12100d;
-  --bg-sunk: #0c0b09;
-  --surface: #1a1713;
-  --surface-2: #211d18;
-  --surface-3: #2a251f;
-  --surface-inv: #efe7d8;
-  --line: rgb(236 222 196 / 0.085);
-  --line-2: rgb(236 222 196 / 0.15);
-  --line-3: rgb(236 222 196 / 0.26);
+  --bg: #141513;
+  --bg-sunk: #101110;
+  --surface: #1b1c1a;
+  --surface-2: #222320;
+  --surface-3: #2b2c29;
+  --surface-inv: #f3f4f0;
+  --line: rgb(255 255 255 / 0.075);
+  --line-2: rgb(255 255 255 / 0.13);
+  --line-3: rgb(255 255 255 / 0.22);
 
-  --text: #f0e8d9;
-  --text-2: #cbc0ad;
-  --text-3: #b2a591;
-  --text-inv: #15120e;
+  --text: #f2f3ef;
+  --text-2: #c6c8c1;
+  --text-3: #a2a59c;
+  --text-inv: #171914;
 
   --accent: #f4a53c;
   --accent-hi: #ffbc5c;
@@ -86,7 +86,6 @@
   --accent-text: #f7b459; /* accent used as text on bg */
   --accent-soft: rgb(244 165 60 / 0.13);
   --accent-line: rgb(244 165 60 / 0.38);
-  --glow: radial-gradient(60% 60% at 50% 0%, rgb(244 165 60 / 0.16), transparent 70%);
 
   --danger: #f07a64;
   --danger-soft: rgb(240 122 100 / 0.13);
@@ -110,32 +109,31 @@
   --hue-orchid: #c286e6; /* violet */
   --hue-slate: #a2acb9;
 
-  --shadow-1: 0 1px 0 rgb(255 240 210 / 0.035) inset, 0 1px 2px rgb(0 0 0 / 0.35);
-  --shadow-2: 0 1px 0 rgb(255 240 210 / 0.05) inset, 0 8px 24px -8px rgb(0 0 0 / 0.55);
-  --shadow-pop: 0 1px 0 rgb(255 240 210 / 0.06) inset, 0 24px 60px -12px rgb(0 0 0 / 0.7), 0 0 0 1px var(--line-2);
+  --shadow-1: none;
+  --shadow-2: 0 6px 18px -10px rgb(0 0 0 / 0.5);
+  --shadow-pop: 0 16px 40px -16px rgb(0 0 0 / 0.6), 0 0 0 1px var(--line-2);
 
-  --grain-opacity: 0.05;
-  --scrim: rgb(8 6 4 / 0.62);
+  --scrim: rgb(0 0 0 / 0.55);
 }
 
 /* ---------- light: the same desk in daylight ---------- */
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --bg: #f3eee4;
-  --bg-sunk: #ebe4d5;
-  --surface: #fbf8f1;
-  --surface-2: #f5f0e5;
-  --surface-3: #ece5d6;
-  --surface-inv: #1e1a14;
-  --line: rgb(52 38 18 / 0.1);
-  --line-2: rgb(52 38 18 / 0.17);
-  --line-3: rgb(52 38 18 / 0.3);
+  --bg: #f2f1ed;
+  --bg-sunk: #ebeae5;
+  --surface: #fbfbf9;
+  --surface-2: #f5f5f2;
+  --surface-3: #e9e9e4;
+  --surface-inv: #1c1d1a;
+  --line: rgb(20 21 19 / 0.09);
+  --line-2: rgb(20 21 19 / 0.15);
+  --line-3: rgb(20 21 19 / 0.27);
 
-  --text: #1e1a14;
-  --text-2: #4f463a;
-  --text-3: #635a4c;
-  --text-inv: #f6f1e7;
+  --text: #171914;
+  --text-2: #45483f;
+  --text-3: #5f625a;
+  --text-inv: #f7f8f5;
 
   --accent: #b9520e;
   --accent-hi: #a1460a;
@@ -143,7 +141,6 @@
   --accent-text: #8f3f08;
   --accent-soft: rgb(185 82 14 / 0.09);
   --accent-line: rgb(185 82 14 / 0.32);
-  --glow: radial-gradient(60% 60% at 50% 0%, rgb(232 150 50 / 0.18), transparent 70%);
 
   --danger: #a3361f;
   --danger-soft: rgb(184 64 42 / 0.09);
@@ -164,12 +161,11 @@
   --hue-orchid: #8a45b3;
   --hue-slate: #586474;
 
-  --shadow-1: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 1px 2px rgb(60 40 10 / 0.08);
-  --shadow-2: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 10px 28px -12px rgb(60 40 10 / 0.22);
-  --shadow-pop: 0 24px 60px -14px rgb(60 40 10 / 0.3), 0 0 0 1px var(--line-2);
+  --shadow-1: none;
+  --shadow-2: 0 6px 18px -10px rgb(20 21 19 / 0.18);
+  --shadow-pop: 0 16px 40px -18px rgb(20 21 19 / 0.28), 0 0 0 1px var(--line-2);
 
-  --grain-opacity: 0.06;
-  --scrim: rgb(40 30 15 / 0.35);
+  --scrim: rgb(20 21 19 / 0.32);
 }
 
 /* Hue and confidence helpers. Set --c on an element, then use these. */

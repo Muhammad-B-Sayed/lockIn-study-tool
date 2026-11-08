@@ -39,22 +39,8 @@
   position: relative;
   height: 104px;
   overflow: hidden;
-  background:
-    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--c) 45%, transparent), transparent 60%),
-    linear-gradient(160deg, color-mix(in srgb, var(--c) 30%, var(--surface-2)), color-mix(in srgb, var(--c) 10%, var(--surface)));
+  background: color-mix(in srgb, var(--c) 16%, var(--surface));
   border-bottom: 1px solid color-mix(in srgb, var(--c) 25%, transparent);
-}
-.course-card__cover::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--c) 18%, transparent) 0 1px,
-    transparent 1px 14px
-  );
-  mask-image: linear-gradient(90deg, transparent, #000 70%);
-  opacity: 0.6;
 }
 .course-card__glyph {
   position: absolute;
@@ -185,4 +171,9 @@
     padding: 1rem;
     flex-direction: row;
   }
+}
+
+.course-card__glyph {
+  opacity: 1;
+  color: color-mix(in srgb, var(--c) 78%, var(--text));
 }

@@ -44,15 +44,9 @@
 .btn--primary {
   background: var(--accent);
   color: var(--accent-ink);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.25) inset,
-    0 6px 18px -8px var(--accent-line);
 }
 .btn--primary:hover:not(:disabled) {
   background: var(--accent-hi);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.25) inset,
-    0 10px 26px -8px var(--accent-line);
 }
 
 .btn--secondary {
@@ -417,7 +411,6 @@
 }
 .dialog::backdrop {
   background: var(--scrim);
-  backdrop-filter: blur(3px);
   animation: fade-in var(--dur-2) var(--ease-out);
 }
 .dialog[open] .dialog__panel {
@@ -601,9 +594,8 @@
 
 .skeleton {
   display: block;
-  background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2));
-  background-size: 200% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
+  background: var(--surface-3);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
   border-radius: 6px;
 }
 @keyframes shimmer {
@@ -964,4 +956,10 @@ a.course-tag:hover {
 .picker[data-invalid] {
   border-color: var(--danger);
   box-shadow: 0 0 0 3px var(--danger-soft);
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
 }

@@ -191,7 +191,7 @@
   background: var(--accent);
   border-radius: 8px;
   padding: 0 0.4rem;
-  box-shadow: 0 0 16px -4px var(--accent);
+
 }
 .week__day[data-today] .week__dow {
   color: var(--accent-text);
@@ -257,7 +257,6 @@
   right: 0;
   height: 2px;
   background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
   z-index: 2;
 }
 .week__now::before {
@@ -645,15 +644,6 @@
   }
 }
 
-.week__body::before {
-  content: '';
-  position: sticky;
-  top: 0;
-  grid-column: 1 / -1;
-  height: 0;
-  box-shadow: 0 0 10px 6px color-mix(in srgb, var(--surface) 80%, transparent);
-  z-index: 4;
-}
 
 .block__time .block__code {
   display: inline;
@@ -763,4 +753,8 @@
 .agenda-day .cal-chip__course--agenda,
 .cal__tray .cal-chip__course--agenda {
   display: inline;
+}
+
+.block__time {
+  color: var(--text-2);
 }

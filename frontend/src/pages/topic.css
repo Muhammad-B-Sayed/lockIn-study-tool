@@ -143,7 +143,6 @@
   resize: vertical;
   padding: 0.2rem 0 0;
   background: transparent;
-  background-image: repeating-linear-gradient(180deg, transparent 0 calc(1.75rem - 1px), var(--line) calc(1.75rem - 1px) 1.75rem);
   background-attachment: local;
   line-height: 1.75rem;
   font-size: var(--text-md);
@@ -219,7 +218,7 @@
 .conf-card {
   display: grid;
   gap: 0.9rem;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--cf) 9%, var(--surface)), var(--surface) 70%);
+  background: var(--surface);
 }
 .conf-card__now {
   display: flex;

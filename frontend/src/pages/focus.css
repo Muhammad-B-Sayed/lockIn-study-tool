@@ -11,40 +11,6 @@
 :root[data-theme='light'] .focus {
   background: var(--bg);
 }
-/* The lamp. It warms as the session goes on. */
-.focus__lamp {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      ellipse 60% 55% at 50% 0%,
-      color-mix(in srgb, var(--accent) calc(10% + var(--p) * 22%), transparent),
-      transparent 70%
-    ),
-    radial-gradient(ellipse 40% 30% at 50% 100%, color-mix(in srgb, var(--c) 8%, transparent), transparent 70%);
-  transition: background 2s linear;
-}
-.focus__lamp::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: -60px;
-  width: 240px;
-  height: 120px;
-  translate: -50% 0;
-  border-radius: 50%;
-  background: var(--accent);
-  filter: blur(70px);
-  opacity: calc(0.25 + var(--p) * 0.35);
-  animation: breathe 6s var(--ease-in-out) infinite;
-}
-@keyframes breathe {
-  50% {
-    transform: scale(1.12);
-    opacity: calc(0.3 + var(--p) * 0.4);
-  }
-}
 .focus__inner {
   position: relative;
   min-height: 100%;
@@ -72,7 +38,7 @@
   border: 1px solid var(--line-2);
   font-size: var(--text-xs);
   color: var(--text-2);
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  background: var(--surface);
 }
 .focus__dot {
   width: 7px;
@@ -249,7 +215,6 @@ a.clock__title:hover {
   letter-spacing: -0.045em;
   line-height: 0.95;
   color: var(--text);
-  text-shadow: 0 0 80px color-mix(in srgb, var(--accent) calc(var(--p) * 40%), transparent);
 }
 .clock__time[data-over] {
   color: var(--accent-text);
@@ -269,8 +234,7 @@ a.clock__title:hover {
   inset: 0;
   transform-origin: left;
   transform: scaleX(var(--p));
-  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 50%, transparent), var(--accent));
-  box-shadow: 0 0 12px var(--accent);
+  background: var(--accent);
   transition: transform 0.25s linear;
 }
 .clock__elapsed {

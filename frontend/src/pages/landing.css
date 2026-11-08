@@ -6,35 +6,6 @@
   overflow-x: hidden;
   padding: 0 clamp(1rem, 4vw, 3rem);
 }
-.landing__lamp {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 900px;
-  pointer-events: none;
-  background:
-    radial-gradient(40% 45% at 30% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
-    radial-gradient(30% 30% at 85% 30%, color-mix(in srgb, var(--hue-sky) 8%, transparent), transparent 70%);
-}
-.landing__lamp::after {
-  content: '';
-  position: absolute;
-  left: 30%;
-  top: -80px;
-  width: 340px;
-  height: 160px;
-  translate: -50% 0;
-  border-radius: 50%;
-  background: var(--accent);
-  filter: blur(90px);
-  opacity: 0.35;
-  animation: breathe 7s var(--ease-in-out) infinite;
-}
-@keyframes breathe {
-  50% {
-    transform: scale(1.1);
-    opacity: 0.45;
-  }
-}
 .landing__top {
   position: relative;
   width: 100%;
@@ -115,10 +86,8 @@
   gap: 1.25rem;
   padding: 1.5rem;
   border-radius: var(--r-xl);
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  background: var(--surface);
   border: 1px solid var(--line-2);
-  box-shadow: var(--shadow-2);
-  backdrop-filter: blur(10px);
 }
 .auth .seg {
   width: 100%;
