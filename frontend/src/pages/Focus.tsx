@@ -30,7 +30,6 @@ export default function Focus() {
 function FocusFrame({ children, progress = 0, hue }: { children: React.ReactNode; progress?: number; hue?: string }) {
   return (
     <div className="focus" data-hue={hue} style={{ ['--p' as string]: Math.min(1, progress) }}>
-      <div className="focus__lamp" aria-hidden />
       <div className="focus__inner">{children}</div>
     </div>
   )

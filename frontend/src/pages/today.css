@@ -183,7 +183,6 @@ a.agenda__title:hover {
 }
 .rhythm__bar[data-today] {
   background: var(--accent);
-  box-shadow: 0 0 12px -2px var(--accent);
 }
 .rhythm__chart {
   position: relative;

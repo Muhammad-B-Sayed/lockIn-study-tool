@@ -56,9 +56,7 @@
   margin-top: -0.2rem;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow:
-    0 0 0 3px var(--accent-soft),
-    0 0 18px 2px color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: none;
 }
 .wordmark--lg .wordmark__lamp {
   width: 0.62rem;
@@ -75,7 +73,7 @@
   gap: 1.1rem;
   padding: 1.25rem 0.85rem 0.85rem;
   border-right: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg-sunk) 55%, var(--bg));
+  background: var(--surface);
   overflow-y: auto;
   z-index: var(--z-nav);
 }
@@ -152,7 +150,6 @@
   width: 3px;
   border-radius: 0 3px 3px 0;
   background: var(--accent);
-  box-shadow: 0 0 12px var(--accent);
 }
 .nav__item.active svg {
   color: var(--accent-text);
@@ -368,15 +365,6 @@
   position: relative;
   overflow-x: clip;
 }
-.main::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: 420px;
-  background: var(--glow);
-  pointer-events: none;
-  z-index: -1;
-}
 
 @media (max-width: 860px) {
   .shell {
@@ -395,8 +383,7 @@
     height: 56px;
     padding: 0 0.5rem 0 1rem;
     padding-top: env(safe-area-inset-top);
-    background: color-mix(in srgb, var(--bg) 82%, transparent);
-    backdrop-filter: blur(14px) saturate(1.2);
+    background: var(--bg);
     border-bottom: 1px solid var(--line);
   }
   .topbar .wordmark {
@@ -418,8 +405,7 @@
     align-items: center;
     height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
     padding: 0 0.25rem env(safe-area-inset-bottom);
-    background: color-mix(in srgb, var(--bg-sunk) 88%, transparent);
-    backdrop-filter: blur(16px) saturate(1.2);
+    background: var(--surface);
     border-top: 1px solid var(--line);
   }
   .tabbar__item {
@@ -490,7 +476,6 @@
 }
 .palette::backdrop {
   background: var(--scrim);
-  backdrop-filter: blur(3px);
 }
 .palette__panel {
   border-radius: var(--r-lg);
