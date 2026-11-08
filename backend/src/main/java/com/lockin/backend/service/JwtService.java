@@ -39,9 +39,7 @@ public class JwtService {
                 .expiresAt(expiresAt)
                 .subject(user.getUsername());
 
-        if (user.getId() != null) {
-            claimsBuilder.claim("uid", user.getId().toString());
-        }
+        claimsBuilder.claim("uid", user.getId().toString());
 
         JwtClaimsSet claims = claimsBuilder.build();
 

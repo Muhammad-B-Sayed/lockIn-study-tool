@@ -4,14 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import com.lockin.backend.dto.AuthResponse;
+import com.lockin.backend.dto.ChangePasswordRequest;
 import com.lockin.backend.dto.LoginRequest;
 import com.lockin.backend.dto.SignupRequest;
 import com.lockin.backend.dto.UserResponse;
 import com.lockin.backend.entity.UserAccount;
 import com.lockin.backend.exception.ConflictException;
+import com.lockin.backend.exception.BadRequestException;
 import com.lockin.backend.exception.UnauthorizedException;
 import com.lockin.backend.repository.UserAccountRepository;
 import java.util.Optional;
@@ -98,5 +101,38 @@ class UserServiceTest {
 
         assertEquals("token-value", response.accessToken());
         assertEquals("muhammad", response.user().username());
+    }
+
+    @Test
+    void changePasswordVerifiesCurrentPasswordBeforeEncodingNewPassword() {
+        var accountId = java.util.UUID.randomUUID();
+        UserAccount user = new UserAccount();
+        user.setUsername("muhammad");
+        user.setPasswordHash("old-hash");
+        when(userAccountRepository.findById(accountId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("old-secret", "old-hash")).thenReturn(true);
+        when(passwordEncoder.encode("new-secret")).thenReturn("new-hash");
+
+        userService.changePassword(accountId, new ChangePasswordRequest("old-secret", "new-secret"));
+
+        verify(passwordEncoder).matches("old-secret", "old-hash");
+        verify(passwordEncoder).encode("new-secret");
+        assertEquals("new-hash", user.getPasswordHash());
+    }
+
+    @Test
+    void changePasswordRejectsWrongCurrentPasswordWithoutChangingHash() {
+        var accountId = java.util.UUID.randomUUID();
+        UserAccount user = new UserAccount();
+        user.setPasswordHash("old-hash");
+        when(userAccountRepository.findById(accountId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong-secret", "old-hash")).thenReturn(false);
+
+        var exception = assertThrows(BadRequestException.class,
+                () -> userService.changePassword(accountId, new ChangePasswordRequest("wrong-secret", "new-secret")));
+
+        assertEquals("Your current password is wrong.", exception.getMessage());
+        assertEquals("old-hash", user.getPasswordHash());
+        verify(passwordEncoder, never()).encode(any());
     }
 }

@@ -1,0 +1,77 @@
+.settings {
+  max-width: 860px;
+}
+.settings__list {
+  display: grid;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  overflow: hidden;
+}
+.srow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1.25rem 1.4rem;
+}
+.srow + .srow,
+.settings__danger {
+  border-top: 1px solid var(--line);
+}
+.srow--stack {
+  align-items: flex-start;
+}
+.srow__text {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.srow__title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 480;
+}
+.srow__body {
+  margin-top: 0.2rem;
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  max-width: 50ch;
+}
+.settings__danger {
+  background: color-mix(in srgb, var(--danger) 4%, transparent);
+}
+.pw {
+  flex: 1 1 320px;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+.pw .field {
+  width: 100%;
+}
+.keys {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  width: min(100%, 340px);
+}
+.srow__control {
+  display: flex;
+  justify-content: flex-end;
+}
+.keys > div {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+}
+.keys dt {
+  display: flex;
+  gap: 3px;
+}
+.keys dd {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
