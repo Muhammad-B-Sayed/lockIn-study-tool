@@ -1,133 +1,84 @@
-# LockIn Study Tool
+# LockIn study tool
 
-LockIn is a full-stack study planning app built with a Spring Boot backend, a React frontend, and PostgreSQL persistence. It gives users one workspace for tasks, deadlines, calendar events, quotes, and account management.
+LockIn turns a syllabus into a study plan. Organize courses and topics, keep notes and resource links, plan study blocks, track deadlines, and work through a review queue based on self-reported confidence. Focus sessions log study time and end with an optional confidence check-in.
 
-## Stack
+## Try the demo
 
-- Backend: Java 21, Spring Boot 3, Spring Security, Spring Data JPA, Flyway
-- Frontend: React 19, TypeScript, Vite, Vitest
-- Database: PostgreSQL 16
-- Tooling: Maven, npm, GitHub Actions
+The demo runs entirely in the browser. No account or backend is needed.
 
-## Features
-
-- JWT-based login and signup
-- Task creation, editing, completion, deletion, and filtering
-- Calendar month view with event creation, editing, completion, and deletion
-- Due-soon dashboard and focus lane
-- Quote feed with refresh support
-- Password updates and account deletion
-
-## Architecture
-
-```mermaid
-flowchart LR
-  browser["React + TypeScript Frontend"] --> api["Spring Boot API"]
-  api --> auth["Spring Security + JWT"]
-  api --> db["PostgreSQL"]
-  api --> migrations["Flyway Migrations"]
+```bash
+cd frontend
+npm ci
+npm run dev -- --host 127.0.0.1
 ```
 
-## Project Layout
+Open `http://127.0.0.1:5173` and choose **Try the demo**. It starts with realistic courses, topics, deadlines, review history, and study sessions. Changes stay in this browser's local storage. Signing out keeps the demo data; Settings offers a reset and JSON export.
 
-```text
-backend/   Spring Boot API, database access, auth, and business logic
-frontend/  React web client
-scripts/   Top-level helper scripts for setup, dev, and checks
-```
+## What the app does
 
-## Requirements
+- Today shows planned study, upcoming deadlines, and topics due for review.
+- Courses contain syllabus-ordered topics, confidence coverage, and assessments. Syllabus import creates editable topic and deadline drafts.
+- Topics hold notes, links, study plans, and confidence history. Review ratings have undo.
+- The calendar has week and month views, movable topic plans, fixed deadlines, and personal events.
+- The focus timer logs study sessions. A command palette supports search and quick add.
+- Light, dark, and system themes work across desktop and mobile layouts.
+- Account mode uses JWT authentication and PostgreSQL persistence. Settings supports password changes, account deletion, and JSON export.
 
-- Java 21+
-- Node.js 20+
-- PostgreSQL command-line tools for the local database scripts:
-  `initdb`, `pg_ctl`, `pg_isready`, `psql`, `createdb`
+## Stack and layout
 
-If you do not have local PostgreSQL tools installed, you can use the container setup in `docker-compose.yml` instead.
+- `backend/`: Java 21, Spring Boot 3, Spring Security, Flyway, and PostgreSQL 16.
+- `frontend/`: React 19, TypeScript, Vite, TanStack Query, Vitest, and Playwright.
+- `scripts/`: setup, local development, and repository checks.
+- `.github/workflows/ci.yml`: backend tests, frontend checks, and container builds.
 
-## Quick Start
+## Run the full local app
 
-Install frontend dependencies and warm the backend:
+Use Java 21+ and Node.js 20.19+ or 22.12+. The local database scripts need `initdb`, `pg_ctl`, `pg_isready`, `psql`, and `createdb`. Docker Compose is an alternative if those tools are unavailable.
 
 ```bash
 make bootstrap
-```
-
-Start the full local app:
-
-```bash
 make dev
 ```
 
-That flow:
+This starts PostgreSQL on `localhost:55432`, the backend on `http://localhost:8080`, and the frontend on `http://127.0.0.1:5173`. Run `make stop` to stop the managed backend and database. Frontend-only development is available through `make dev-frontend`; backend-only development through `make dev-backend`.
 
-- starts the local PostgreSQL instance on `localhost:55432`
-- starts the backend on `http://localhost:8080`
-- starts the frontend on `http://127.0.0.1:5173`
+## Checks and review tools
 
-Stop the local backend and database:
+The frontend CI checks are:
 
 ```bash
-make stop
+cd frontend
+npm run lint
+npm test
+npm run build
 ```
 
-## Common Commands
-
-Run the main repo checks:
+For screenshots and the accessibility audit, install Playwright Chromium once:
 
 ```bash
-make test
+npx playwright install chromium
+npm run shots
+npm run a11y
 ```
 
-Build both apps:
+Both tools build once, start an isolated local preview, and use seeded demo data across the configured screens, light and dark themes, and desktop and mobile widths. They close their browser and preview when finished. Screenshots and accessibility reports go in `frontend/.shots/`. The audit's default report mode exits successfully even when it finds violations; `npm run a11y -- --strict` fails for violations or failed scans. See [frontend/README.md](frontend/README.md) for filters and report details.
 
-```bash
-make build
-```
+`make test` runs the repository checks. `make build` builds both apps. `make docker-up` starts the container stack, with the frontend at `http://localhost:4173`, backend at `http://localhost:8080`, and database on port `55432`.
 
-Run only the frontend:
+## Deployment
 
-```bash
-make dev-frontend
-```
+Vercel serves the frontend with `frontend/` as the project root, `npm run build` as the build command, and `dist` as the output directory. `frontend/vercel.json` rewrites SPA routes to `/index.html`, so direct links such as `/app/review` load the app.
 
-Run only the backend:
+For account mode on Vercel, set the build-time `VITE_API_BASE_URL` to the absolute Render backend URL, for example `https://YOUR-BACKEND.onrender.com/api`. The existing `/api` suffix is supported; using just the backend origin also works. Rebuild after changing the variable. Allow the Vercel frontend origin in the backend's `FRONTEND_ORIGINS` setting.
 
-```bash
-make dev-backend
-```
+An unset, empty, or `/api` base uses same-origin `/api` requests. This works through the Vite development proxy or the container's Nginx proxy. The Vercel SPA rewrite does not proxy requests to Render, so same-origin API URLs alone do not connect a static Vercel deployment to the backend. Demo mode remains local.
 
-Run the production-style local stack with Docker:
+`render.yaml` describes the backend service. The Dockerfiles package both apps, and `docker-compose.yml` runs them together.
 
-```bash
-make docker-up
-```
+## Further documentation
 
-That stack serves:
-
-- frontend at `http://localhost:4173`
-- backend at `http://localhost:8080`
-- postgres at `localhost:55432`
-
-## CI
-
-GitHub Actions runs:
-
-- backend tests against PostgreSQL
-- frontend lint
-- frontend tests
-- frontend production build
-
-The workflow lives at `.github/workflows/ci.yml`.
-
-## Deployment Notes
-
-- [backend/Dockerfile](backend/Dockerfile) packages the API as a container image
-- [frontend/Dockerfile](frontend/Dockerfile) builds the React client and serves it with Nginx
-- [docker-compose.yml](docker-compose.yml) runs the full stack together for a production-style preview
-- The frontend keeps `/api` requests same-origin and proxies them to the backend through Nginx in containers
-
-## API and App Docs
-
-- Backend setup and API endpoints: [backend/README.md](backend/README.md)
-- Frontend setup and environment notes: [frontend/README.md](frontend/README.md)
+- [Backend setup and API](backend/README.md)
+- [Frontend setup and review scripts](frontend/README.md)
+- [Frontend data API](frontend/src/lib/data/README.md)
+- [Domain API](frontend/src/lib/domain/API.md)
+- [Redesign plan](docs/redesign-plan.md)

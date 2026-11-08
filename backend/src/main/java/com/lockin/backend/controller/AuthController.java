@@ -7,6 +7,7 @@ import com.lockin.backend.dto.SignupRequest;
 import com.lockin.backend.dto.UserResponse;
 import com.lockin.backend.service.UserService;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,21 +40,21 @@ public class AuthController {
         return userService.login(request);
     }
 
-    @GetMapping("/me")
+    @GetMapping({"/me", "/auth/me"})
     public UserResponse me(Authentication authentication) {
-        return userService.getProfile(authentication.getName());
+        return userService.getProfile(UUID.fromString(authentication.getName()));
     }
 
     @PatchMapping("/me/password")
     public UserResponse changePassword(
             Authentication authentication,
             @Valid @RequestBody ChangePasswordRequest request) {
-        return userService.changePassword(authentication.getName(), request);
+        return userService.changePassword(UUID.fromString(authentication.getName()), request);
     }
 
     @DeleteMapping("/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAccount(Authentication authentication) {
-        userService.deleteAccount(authentication.getName());
+        userService.deleteAccount(UUID.fromString(authentication.getName()));
     }
 }

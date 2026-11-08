@@ -125,6 +125,7 @@ public class QuoteService {
         return score;
     }
 
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
     private record ZenQuoteItem(String q, String a) {
     }
 }

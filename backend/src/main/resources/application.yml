@@ -8,6 +8,9 @@ spring:
     url: ${SPRING_DATASOURCE_URL:${JDBC_DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:55432}/${DB_NAME:lockin}}}
     username: ${DB_USERNAME:lockin}
     password: ${DB_PASSWORD:lockin}
+    hikari:
+      data-source-properties:
+        reWriteBatchedInserts: true
   jpa:
     open-in-view: false
     hibernate:
@@ -18,6 +21,9 @@ spring:
   flyway:
     enabled: true
   jackson:
+    deserialization:
+      adjust-dates-to-context-time-zone: false
+      fail-on-unknown-properties: true
     serialization:
       write-dates-as-timestamps: false
 

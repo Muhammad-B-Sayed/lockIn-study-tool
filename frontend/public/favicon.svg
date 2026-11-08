@@ -1,22 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LockIn">
-  <defs>
-    <linearGradient id="lockin-bg" x1="0%" x2="100%" y1="0%" y2="100%">
-      <stop offset="0%" stop-color="#10293f" />
-      <stop offset="100%" stop-color="#215679" />
-    </linearGradient>
-    <linearGradient id="lockin-accent" x1="0%" x2="100%" y1="0%" y2="100%">
-      <stop offset="0%" stop-color="#f2c078" />
-      <stop offset="100%" stop-color="#ef7b45" />
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="18" fill="url(#lockin-bg)" />
-  <path
-    d="M21 29.5C21 21.492 25.925 16 33 16C40.075 16 45 21.492 45 29.5V33H40.25V29.5C40.25 23.961 37.217 20.75 33 20.75C28.783 20.75 25.75 23.961 25.75 29.5V33H21V29.5Z"
-    fill="#f8f3e8"
-  />
-  <rect x="17" y="30" width="32" height="22" rx="8" fill="#f8f3e8" />
-  <path
-    d="M33 36.5C30.791 36.5 29 38.291 29 40.5C29 42.046 29.878 43.387 31.162 44.049V47.5C31.162 48.512 31.988 49.338 33 49.338C34.012 49.338 34.838 48.512 34.838 47.5V44.049C36.122 43.387 37 42.046 37 40.5C37 38.291 35.209 36.5 33 36.5Z"
-    fill="url(#lockin-accent)"
-  />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="16" fill="#12100d"/>
+  <circle cx="32" cy="30" r="14" fill="#f4a53c" opacity=".18"/>
+  <circle cx="32" cy="30" r="8" fill="#f4a53c"/>
+  <rect x="16" y="46" width="32" height="4" rx="2" fill="#f0e8d9" opacity=".8"/>
 </svg>

@@ -26,11 +26,14 @@ class JwtServiceTest {
 
         UserAccount user = new UserAccount();
         user.setUsername("muhammad");
+        var accountId = java.util.UUID.randomUUID();
+        org.springframework.test.util.ReflectionTestUtils.setField(user, "id", accountId);
 
         var session = jwtService.createSession(user);
         var decoded = decoder.decode(session.accessToken());
 
         assertEquals("muhammad", decoded.getSubject());
+        assertEquals(accountId.toString(), decoded.getClaimAsString("uid"));
         assertEquals("Bearer", session.tokenType());
         assertNotNull(session.expiresAt());
     }

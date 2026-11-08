@@ -1,0 +1,193 @@
+/* LockIn design tokens: "Lamplight".
+   A desk lamp at night. Warm ink surfaces, paper-colored type, one amber light source.
+   Light theme is the same desk in daylight: cream paper and ink. */
+
+:root {
+  /* type */
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-ui: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-2xs: 0.71875rem; /* 11.5 */
+  --text-xs: 0.8125rem; /* 13 */
+  --text-sm: 0.8125rem; /* 13 */
+  --text-md: 0.9375rem; /* 15 */
+  --text-lg: 1.0625rem; /* 17 */
+  --text-xl: 1.3125rem; /* 21 */
+  --text-2xl: 1.75rem; /* 28 */
+  --text-3xl: 2.5rem; /* 40 */
+  --text-4xl: 3.5rem; /* 56 */
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.3;
+  --leading-body: 1.55;
+
+  /* space, 4px grid */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.25rem;
+  --s-6: 1.5rem;
+  --s-8: 2rem;
+  --s-10: 2.5rem;
+  --s-12: 3rem;
+  --s-16: 4rem;
+
+  --r-xs: 5px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 26px;
+  --r-pill: 999px;
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --dur-1: 110ms;
+  --dur-2: 190ms;
+  --dur-3: 320ms;
+  --dur-4: 520ms;
+
+  --sidebar-w: 244px;
+  --content-max: 1160px;
+  --tabbar-h: 64px;
+
+  --z-sticky: 10;
+  --z-nav: 20;
+  --z-pop: 40;
+  --z-modal: 60;
+  --z-toast: 80;
+}
+
+/* ---------- dark: the desk at night (default) ---------- */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #12100d;
+  --bg-sunk: #0c0b09;
+  --surface: #1a1713;
+  --surface-2: #211d18;
+  --surface-3: #2a251f;
+  --surface-inv: #efe7d8;
+  --line: rgb(236 222 196 / 0.085);
+  --line-2: rgb(236 222 196 / 0.15);
+  --line-3: rgb(236 222 196 / 0.26);
+
+  --text: #f0e8d9;
+  --text-2: #cbc0ad;
+  --text-3: #b2a591;
+  --text-inv: #15120e;
+
+  --accent: #f4a53c;
+  --accent-hi: #ffbc5c;
+  --accent-ink: #1c1205;
+  --accent-text: #f7b459; /* accent used as text on bg */
+  --accent-soft: rgb(244 165 60 / 0.13);
+  --accent-line: rgb(244 165 60 / 0.38);
+  --glow: radial-gradient(60% 60% at 50% 0%, rgb(244 165 60 / 0.16), transparent 70%);
+
+  --danger: #f07a64;
+  --danger-soft: rgb(240 122 100 / 0.13);
+  --ok: #8fcf9b;
+
+  /* confidence */
+  --conf-unrated: #8f8473;
+  --conf-shaky: #f07a64;
+  --conf-okay: #ecc25a;
+  --conf-solid: #88c896;
+  --conf-retired: #9a9488;
+
+  /* Course hues. None of them sit near the confidence hues (coral, yellow, green),
+     so a course color never reads as a rating. */
+  --hue-ember: #df78b4; /* magenta */
+  --hue-amber: #c49a7a; /* clay */
+  --hue-moss: #7fa8b0; /* dusty teal */
+  --hue-teal: #48bdd0; /* cyan */
+  --hue-sky: #6ea6f2; /* blue */
+  --hue-iris: #8f8cf4; /* indigo */
+  --hue-orchid: #c286e6; /* violet */
+  --hue-slate: #a2acb9;
+
+  --shadow-1: 0 1px 0 rgb(255 240 210 / 0.035) inset, 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-2: 0 1px 0 rgb(255 240 210 / 0.05) inset, 0 8px 24px -8px rgb(0 0 0 / 0.55);
+  --shadow-pop: 0 1px 0 rgb(255 240 210 / 0.06) inset, 0 24px 60px -12px rgb(0 0 0 / 0.7), 0 0 0 1px var(--line-2);
+
+  --grain-opacity: 0.05;
+  --scrim: rgb(8 6 4 / 0.62);
+}
+
+/* ---------- light: the same desk in daylight ---------- */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f3eee4;
+  --bg-sunk: #ebe4d5;
+  --surface: #fbf8f1;
+  --surface-2: #f5f0e5;
+  --surface-3: #ece5d6;
+  --surface-inv: #1e1a14;
+  --line: rgb(52 38 18 / 0.1);
+  --line-2: rgb(52 38 18 / 0.17);
+  --line-3: rgb(52 38 18 / 0.3);
+
+  --text: #1e1a14;
+  --text-2: #4f463a;
+  --text-3: #635a4c;
+  --text-inv: #f6f1e7;
+
+  --accent: #b9520e;
+  --accent-hi: #a1460a;
+  --accent-ink: #fffaf2;
+  --accent-text: #8f3f08;
+  --accent-soft: rgb(185 82 14 / 0.09);
+  --accent-line: rgb(185 82 14 / 0.32);
+  --glow: radial-gradient(60% 60% at 50% 0%, rgb(232 150 50 / 0.18), transparent 70%);
+
+  --danger: #a3361f;
+  --danger-soft: rgb(184 64 42 / 0.09);
+  --ok: #2f7a43;
+
+  --conf-unrated: #8a8070;
+  --conf-shaky: #c8472f;
+  --conf-okay: #b8840e;
+  --conf-solid: #3d8a51;
+  --conf-retired: #6f6a60;
+
+  --hue-ember: #b03f83;
+  --hue-amber: #8f6446;
+  --hue-moss: #3c6a73;
+  --hue-teal: #0d6c7d;
+  --hue-sky: #2f67b5;
+  --hue-iris: #5150c4;
+  --hue-orchid: #8a45b3;
+  --hue-slate: #586474;
+
+  --shadow-1: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 1px 2px rgb(60 40 10 / 0.08);
+  --shadow-2: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 10px 28px -12px rgb(60 40 10 / 0.22);
+  --shadow-pop: 0 24px 60px -14px rgb(60 40 10 / 0.3), 0 0 0 1px var(--line-2);
+
+  --grain-opacity: 0.06;
+  --scrim: rgb(40 30 15 / 0.35);
+}
+
+/* Hue and confidence helpers. Set --c on an element, then use these. */
+[data-hue='ember'] { --c: var(--hue-ember); }
+[data-hue='amber'] { --c: var(--hue-amber); }
+[data-hue='moss'] { --c: var(--hue-moss); }
+[data-hue='teal'] { --c: var(--hue-teal); }
+[data-hue='sky'] { --c: var(--hue-sky); }
+[data-hue='iris'] { --c: var(--hue-iris); }
+[data-hue='orchid'] { --c: var(--hue-orchid); }
+[data-hue='slate'] { --c: var(--hue-slate); }
+
+[data-conf='unrated'] { --cf: var(--conf-unrated); }
+[data-conf='shaky'] { --cf: var(--conf-shaky); }
+[data-conf='okay'] { --cf: var(--conf-okay); }
+[data-conf='solid'] { --cf: var(--conf-solid); }
+[data-conf='retired'] { --cf: var(--conf-retired); }
+
+:root[data-theme='light'] .strip__cell:not([data-conf='unrated']):not([data-conf='retired']):not(.strip__cell--ghost) {
+  background: linear-gradient(to top, var(--cf) var(--fill), color-mix(in srgb, var(--cf) 48%, transparent) var(--fill));
+}

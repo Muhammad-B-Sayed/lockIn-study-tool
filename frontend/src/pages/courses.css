@@ -1,0 +1,188 @@
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 1.1rem;
+}
+.course-grid > li {
+  animation: rise var(--dur-4) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.course-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  transition:
+    transform var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    border-color var(--dur-2);
+}
+.course-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--c) 40%, var(--line));
+  box-shadow: var(--shadow-2);
+}
+
+/* The cover: a block of the course color with the subject letters set huge and cropped. */
+.course-card__cover {
+  position: relative;
+  height: 104px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--c) 45%, transparent), transparent 60%),
+    linear-gradient(160deg, color-mix(in srgb, var(--c) 30%, var(--surface-2)), color-mix(in srgb, var(--c) 10%, var(--surface)));
+  border-bottom: 1px solid color-mix(in srgb, var(--c) 25%, transparent);
+}
+.course-card__cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--c) 18%, transparent) 0 1px,
+    transparent 1px 14px
+  );
+  mask-image: linear-gradient(90deg, transparent, #000 70%);
+  opacity: 0.6;
+}
+.course-card__glyph {
+  position: absolute;
+  left: 0.9rem;
+  bottom: -1.6rem;
+  font-size: 5.6rem;
+  font-weight: 300;
+  font-style: italic;
+  font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 144;
+  letter-spacing: -0.05em;
+  color: color-mix(in srgb, var(--c) 70%, var(--text));
+  opacity: 0.55;
+  transition: transform var(--dur-4) var(--ease-out);
+}
+.course-card:hover .course-card__glyph {
+  transform: translateX(6px);
+}
+.course-card__num {
+  position: absolute;
+  right: 1rem;
+  top: 0.85rem;
+  font-size: var(--text-xs);
+  color: color-mix(in srgb, var(--c) 60%, var(--text));
+  letter-spacing: 0.08em;
+}
+
+.course-card__body {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem 1.15rem 1.05rem;
+  flex: 1;
+  align-content: start;
+}
+.course-card__code {
+  font-size: var(--text-xs);
+  color: var(--c);
+  font-weight: 500;
+}
+.course-card__name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 460;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+.course-card__meta {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+.course-card__strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+.course-card__stat {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+.course-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+  font-size: var(--text-sm);
+  min-height: 2.6rem;
+}
+.course-card__next {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  flex: 1;
+  justify-content: space-between;
+}
+.course-card__next-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-2);
+}
+.course-card__late {
+  font-size: var(--text-xs);
+  color: var(--danger);
+  font-weight: 560;
+  white-space: nowrap;
+}
+
+.course-card--add {
+  width: 100%;
+  min-height: 230px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border-style: dashed;
+  border-color: var(--line-2);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-3);
+  font-weight: 520;
+}
+.course-card--add:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.courses .conf-key {
+  margin: -0.75rem 0 1.25rem;
+  padding: 0;
+  border: 0;
+}
+
+@media (max-width: 640px) {
+  .course-card__cover {
+    height: 52px;
+  }
+  .course-card__glyph {
+    font-size: 3.4rem;
+    bottom: -1rem;
+  }
+  .course-card--add {
+    min-height: 0;
+    padding: 1rem;
+    flex-direction: row;
+  }
+}

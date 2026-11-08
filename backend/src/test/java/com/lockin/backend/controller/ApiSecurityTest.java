@@ -15,15 +15,11 @@ import com.lockin.backend.config.SecurityConfig;
 import com.lockin.backend.config.WebConfig;
 import com.lockin.backend.dto.AuthResponse;
 import com.lockin.backend.dto.LoginRequest;
-import com.lockin.backend.dto.TaskResponse;
 import com.lockin.backend.dto.UserResponse;
 import com.lockin.backend.exception.ApiExceptionHandler;
-import com.lockin.backend.service.TaskService;
 import com.lockin.backend.service.UserService;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -37,7 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@WebMvcTest(controllers = {AuthController.class, TaskController.class, SystemController.class})
+@WebMvcTest(controllers = {AuthController.class, StudyController.class, SystemController.class})
 @Import({SecurityConfig.class, WebConfig.class, ApiExceptionHandler.class, ApiSecurityTest.TestSecurityConfig.class})
 class ApiSecurityTest {
 
@@ -51,7 +47,10 @@ class ApiSecurityTest {
     private UserService userService;
 
     @MockitoBean
-    private TaskService taskService;
+    private com.lockin.backend.service.StudyService studyService;
+
+    @MockitoBean
+    private com.lockin.backend.repository.UserAccountRepository accounts;
 
     @Test
     void loginReturnsSessionTokenPayload() throws Exception {
@@ -77,32 +76,21 @@ class ApiSecurityTest {
     }
 
     @Test
-    void protectedTasksEndpointRejectsAnonymousRequests() throws Exception {
-        mockMvc.perform(get("/api/me/tasks"))
+    void protectedWorkspaceEndpointRejectsAnonymousRequests() throws Exception {
+        mockMvc.perform(get("/api/workspace"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value("Authentication required."));
     }
 
     @Test
-    void protectedTasksEndpointUsesJwtSubjectForCurrentUser() throws Exception {
-        TaskResponse task = new TaskResponse(
-                UUID.fromString("22222222-2222-2222-2222-222222222222"),
-                "Finish sprint notes",
-                "Wrap up the planning summary",
-                LocalDate.parse("2026-06-20"),
-                "Ops",
-                false,
-                "Task");
-
-        when(taskService.getTasks("muhammad")).thenReturn(List.of(task));
-
-        mockMvc.perform(get("/api/me/tasks")
-                        .with(jwt().jwt(jwt -> jwt.subject("muhammad"))))
+    void profileUsesImmutableAccountIdFromPrincipal() throws Exception {
+        UUID accountId = UUID.randomUUID();
+        when(userService.getProfile(accountId)).thenReturn(new UserResponse(accountId, "muhammad", null));
+        mockMvc.perform(get("/api/auth/me")
+                        .with(jwt().jwt(jwt -> jwt.subject(accountId.toString()))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Finish sprint notes"))
-                .andExpect(jsonPath("$[0].course").value("Ops"));
-
-        verify(taskService).getTasks("muhammad");
+                .andExpect(jsonPath("$.username").value("muhammad"));
+        verify(userService).getProfile(accountId);
     }
 
     @Test

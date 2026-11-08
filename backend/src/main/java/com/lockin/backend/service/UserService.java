@@ -7,10 +7,12 @@ import com.lockin.backend.dto.SignupRequest;
 import com.lockin.backend.dto.UserResponse;
 import com.lockin.backend.entity.UserAccount;
 import com.lockin.backend.exception.ConflictException;
+import com.lockin.backend.exception.BadRequestException;
 import com.lockin.backend.exception.NotFoundException;
 import com.lockin.backend.exception.UnauthorizedException;
 import com.lockin.backend.repository.UserAccountRepository;
 import jakarta.transaction.Transactional;
+import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -54,23 +56,31 @@ public class UserService {
         return jwtService.createSession(user);
     }
 
-    public UserResponse getProfile(String username) {
-        return jwtService.toUserResponse(requireUser(username));
+    public UserResponse getProfile(UUID accountId) {
+        return jwtService.toUserResponse(requireUser(accountId));
     }
 
     @Transactional
-    public UserResponse changePassword(String username, ChangePasswordRequest request) {
-        UserAccount user = requireUser(username);
+    public UserResponse changePassword(UUID accountId, ChangePasswordRequest request) {
+        UserAccount user = requireUser(accountId);
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("Your current password is wrong.");
+        }
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         return jwtService.toUserResponse(user);
     }
 
     @Transactional
-    public void deleteAccount(String username) {
-        userAccountRepository.delete(requireUser(username));
+    public void deleteAccount(UUID accountId) {
+        userAccountRepository.delete(requireUser(accountId));
     }
 
-    public UserAccount requireUser(String username) {
+    public UserAccount requireUser(UUID accountId) {
+        return userAccountRepository.findById(accountId)
+                .orElseThrow(() -> new UnauthorizedException("Your account no longer exists."));
+    }
+
+    private UserAccount requireUser(String username) {
         return userAccountRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("User not found: " + username));
     }
