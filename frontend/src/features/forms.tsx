@@ -34,6 +34,40 @@ function ColorPicker({ value, onChange }: { value: ColorKey; onChange: (c: Color
 
 const emptyToNull = (s: string) => (s.trim() ? s.trim() : null)
 
+/** Delete with a second step, so one stray click cannot remove something for good. */
+function ConfirmDelete({ what, onDelete }: { what: string; onDelete: () => Promise<void> }) {
+  const [armed, setArmed] = useState(false)
+  const [busy, setBusy] = useState(false)
+  if (!armed) {
+    return (
+      <Button variant="danger" icon="trash" onClick={() => setArmed(true)}>
+        Delete
+      </Button>
+    )
+  }
+  return (
+    <span className="confirm-delete" role="group" aria-label={`Delete this ${what}?`}>
+      <span className="confirm-delete__q">Delete this {what}?</span>
+      <Button variant="ghost" size="sm" autoFocus disabled={busy} onClick={() => setArmed(false)}>
+        Keep
+      </Button>
+      <Button
+        variant="danger"
+        size="sm"
+        icon="trash"
+        loading={busy}
+        onClick={async () => {
+          setBusy(true)
+          await onDelete()
+          setBusy(false)
+        }}
+      >
+        Delete
+      </Button>
+    </span>
+  )
+}
+
 // ---------- course ----------
 
 export function CourseDialog(props: Parameters<typeof CourseDialogBody>[0]) {
@@ -233,21 +267,18 @@ function AssessmentDialogBody({
       footer={
         <>
           {assessment ? (
-            <Button
-              variant="danger"
-              icon="trash"
-              onClick={async () => {
+            <ConfirmDelete
+              what="deadline"
+              onDelete={async () => {
                 try {
                   await m.remove(assessment.id)
-                  toast.show({ message: 'Deadline deleted' })
+                  toast.show({ message: `Deleted ${assessment.title}` })
                   onClose()
                 } catch (err) {
                   toast.error(err)
                 }
               }}
-            >
-              Delete
-            </Button>
+            />
           ) : null}
           <span className="spacer" />
           <Button variant="ghost" onClick={onClose}>
@@ -291,9 +322,9 @@ function AssessmentDialogBody({
           <Field label="Time" htmlFor={`${id}-time`} optional>
             <PickerField id={`${id}-time`} type="time" icon="clock" label="Due time" value={dueTime} display={dueTime ? formatTime(dueTime) : ''} placeholder="Any time" onChange={(v) => setDueTime(v)} onClear={() => setDueTime('')} />
           </Field>
-          <Field label="% of final grade" htmlFor={`${id}-w`} optional error={errors.weight}>
+          <Field label="Weight" htmlFor={`${id}-w`} optional error={errors.weight}>
             <span className="suffix-field">
-              <Input id={`${id}-w`} inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} className="t-mono" />
+              <Input id={`${id}-w`} inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} className="t-mono" aria-label="Weight, percent of final grade" placeholder="0" />
               <span className="suffix-field__suffix" aria-hidden>
                 %
               </span>
@@ -389,6 +420,7 @@ function EventDialogBody({
     try {
       if (event) await m.update(event.id, input)
       else await m.create(input)
+      toast.show({ message: event ? 'Event saved' : `Added ${input.title}` })
       onClose()
     } catch (err) {
       toast.error(err)
@@ -407,20 +439,18 @@ function EventDialogBody({
       footer={
         <>
           {event ? (
-            <Button
-              variant="danger"
-              icon="trash"
-              onClick={async () => {
+            <ConfirmDelete
+              what="event"
+              onDelete={async () => {
                 try {
                   await m.remove(event.id)
+                  toast.show({ message: `Deleted ${event.title}` })
                   onClose()
                 } catch (err) {
                   toast.error(err)
                 }
               }}
-            >
-              Delete
-            </Button>
+            />
           ) : null}
           <span className="spacer" />
           <Button variant="ghost" onClick={onClose}>

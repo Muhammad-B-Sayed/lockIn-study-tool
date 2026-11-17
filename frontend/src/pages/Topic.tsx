@@ -10,7 +10,7 @@ import { ConfidenceGlyph } from '../ui/confidence'
 import { CONFIDENCE } from '../ui/confidenceMeta'
 import { Icon } from '../ui/Icon'
 import { Menu } from '../ui/Menu'
-import { Button, EmptyState, IconButton, Input } from '../ui/primitives'
+import { Button, Dialog, EmptyState, IconButton, Input } from '../ui/primitives'
 import { PickerField } from '../ui/PickerField'
 import { CourseTag, DueTag, KindTag, RateControl } from '../ui/study'
 import { useToast } from '../ui/toastContext'
@@ -65,6 +65,8 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
   const [title, setTitle] = useState(t.title)
   const [details, setDetails] = useState(t.details ?? '')
   const [notes, setNotes] = useState(t.notes)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const notesTimer = useRef<number | undefined>(undefined)
 
   // Notes autosave: 900 ms after typing stops, and on leave.
@@ -172,15 +174,7 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
                 label: 'Delete topic',
                 icon: 'trash',
                 tone: 'danger',
-                onSelect: async () => {
-                  try {
-                    await remove(t.id)
-                    toast.show({ message: `Deleted ${t.title}` })
-                    navigate(`/app/courses/${t.courseId}`)
-                  } catch (err) {
-                    toast.error(err)
-                  }
-                },
+                onSelect: () => setConfirmDelete(true),
               },
             ]}
           />
@@ -280,6 +274,41 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
           </section>
         </aside>
       </div>
+
+      <Dialog
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        size="sm"
+        title="Delete this topic?"
+        description={`“${t.title}” goes away with its notes, materials and rating history. This cannot be undone. Marking it “Not on the exam” hides it from review and keeps everything.`}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
+              Keep it
+            </Button>
+            <Button
+              variant="danger"
+              icon="trash"
+              loading={deleting}
+              onClick={async () => {
+                setDeleting(true)
+                try {
+                  await remove(t.id)
+                  toast.show({ message: `Deleted ${t.title}` })
+                  navigate(`/app/courses/${t.courseId}`)
+                } catch (err) {
+                  setDeleting(false)
+                  toast.error(err)
+                }
+              }}
+            >
+              Delete topic
+            </Button>
+          </>
+        }
+      >
+        <span className="sr-only">Confirm delete</span>
+      </Dialog>
     </div>
   )
 }
@@ -398,8 +427,13 @@ function Resources({ t }: { t: TopicT }) {
     }
   }
   const removeAt = async (i: number) => {
+    const removed = list[i]
     try {
       await update(t.id, { resources: list.filter((_, n) => n !== i) })
+      toast.show({
+        message: `Removed ${removed.label}`,
+        action: { label: 'Undo', run: () => update(t.id, { resources: list }).then(() => undefined) },
+      })
     } catch (err) {
       toast.error(err)
     }

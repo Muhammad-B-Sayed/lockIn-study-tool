@@ -7,12 +7,14 @@ import { errorMessage, useToast } from '../ui/toastContext'
 import { Kbd } from '../ui/primitives'
 import './settings.css'
 
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
+
 export default function Settings() {
   const auth = useAuth()
   const account = useAccount()
   const toast = useToast()
   const navigate = useNavigate()
-  const { setPref, resolved } = useTheme()
+  const { pref, setPref } = useTheme()
   const [confirm, setConfirm] = useState<'delete' | 'reset' | null>(null)
   const [busy, setBusy] = useState(false)
   const demo = auth.state.status === 'signed-in' && auth.state.mode === 'demo'
@@ -36,20 +38,21 @@ export default function Settings() {
     <div className="page settings">
       <header className="page-head">
         <div>
-          <p className="t-eyebrow page-head__eyebrow">Settings</p>
           <h1 className="page-head__title t-display">Settings</h1>
+          <p className="page-head__sub">{demo ? 'Appearance, your demo data and shortcuts.' : 'Appearance, your account and your data.'}</p>
         </div>
       </header>
 
       <div className="settings__list">
-        <Row title="Appearance" body="Starts with your system setting. Pick one to keep it.">
-          <Segmented<'dark' | 'light'>
+        <Row title="Appearance" body="System follows your device’s light or dark setting.">
+          <Segmented<'system' | 'light' | 'dark'>
             label="Theme"
-            value={resolved}
+            value={pref}
             onChange={setPref}
             options={[
-              { value: 'dark', label: 'Dark', icon: 'moon' },
+              { value: 'system', label: 'System' },
               { value: 'light', label: 'Light', icon: 'sun' },
+              { value: 'dark', label: 'Dark', icon: 'moon' },
             ]}
           />
         </Row>
@@ -79,7 +82,7 @@ export default function Settings() {
           <dl className="keys">
             <div>
               <dt>
-                <Kbd>⌘</Kbd>
+                <Kbd>{isMac ? '⌘' : 'Ctrl'}</Kbd>
                 <Kbd>K</Kbd>
               </dt>
               <dd>Search, jump or quick add</dd>

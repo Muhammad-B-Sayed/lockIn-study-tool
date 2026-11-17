@@ -1,0 +1,184 @@
+/* This week panel: totals, daily goal, time per course, session log. */
+.week__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+.week__num {
+  font-size: var(--text-2xl);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+}
+.week__label {
+  font-size: var(--text-xs);
+  margin-top: 0.15rem;
+}
+
+.week__goal {
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.week__goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.week__goal-text {
+  flex: 1 1 200px;
+  min-width: 0;
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+.week__goal-text strong {
+  color: var(--text);
+  font-weight: 560;
+}
+.week__track {
+  height: 6px;
+  margin-top: 0.65rem;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.week__fill {
+  display: block;
+  width: var(--w);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width var(--dur-4) var(--ease-out);
+}
+.week__goal[data-met] .week__fill {
+  background: var(--ok);
+}
+
+.week__courses {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}
+.week__course {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.5fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+.week__course-name {
+  min-width: 0;
+  font-size: var(--text-sm);
+}
+.week__bars {
+  display: grid;
+  gap: 3px;
+}
+.week__bar {
+  display: block;
+  width: max(var(--w), 2px);
+  height: 7px;
+  border-radius: 2px;
+  background: var(--c, var(--accent));
+  transition: width var(--dur-4) var(--ease-out);
+}
+.week__bar--prev {
+  height: 4px;
+  background: var(--line-3);
+}
+.week__course-n {
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.week__legend {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--text-xs);
+}
+.week__key {
+  width: 14px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.week__key--prev {
+  height: 4px;
+  margin-left: 0.6rem;
+  background: var(--line-3);
+}
+
+.week__sub {
+  margin: 1.25rem 0 0.4rem;
+}
+.week__log {
+  display: grid;
+}
+.week__entry {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+}
+.week__entry + .week__entry {
+  border-top: 1px solid var(--line);
+}
+.week__entry-when {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+.week__entry-main {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.week__entry-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  font-size: var(--text-sm);
+}
+.week__entry-title > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.week__entry-note {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.week__entry-min {
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+.week__more {
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 480px) {
+  .week__stats {
+    gap: 0.6rem;
+  }
+  .week__num {
+    font-size: var(--text-xl);
+  }
+  .week__course {
+    grid-template-columns: minmax(64px, auto) minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+  .week__entry {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+  .week__entry-when {
+    grid-column: 1 / -1;
+    margin-bottom: -0.35rem;
+  }
+}

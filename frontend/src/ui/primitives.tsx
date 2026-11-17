@@ -194,6 +194,8 @@ export function Dialog({
   size?: 'sm' | 'md' | 'lg'
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  // A drag that starts inside the panel (selecting text in a field) and ends on the backdrop is not a dismissal.
+  const pressedBackdrop = useRef(false)
 
   useEffect(() => {
     const el = ref.current
@@ -210,8 +212,12 @@ export function Dialog({
         e.preventDefault()
         onClose()
       }}
+      onPointerDown={(e) => {
+        pressedBackdrop.current = e.target === e.currentTarget
+      }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
+        if (e.target === e.currentTarget && pressedBackdrop.current) onClose()
+        pressedBackdrop.current = false
       }}
       aria-labelledby="dialog-title"
     >

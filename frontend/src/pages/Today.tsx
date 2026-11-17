@@ -5,6 +5,7 @@ import { formatDate, localDate } from '../app/format'
 import type { Assessment, CalendarEvent, Topic } from '../lib/data/types'
 import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { DeadlineRow, ReviewRow } from '../features/rows'
+import { WeekPanel } from '../features/WeekPanel'
 import { startFocus, useRateWithUndo, useToggleDone } from '../features/actions'
 import { Icon } from '../ui/Icon'
 import { Button, EmptyState } from '../ui/primitives'
@@ -148,6 +149,7 @@ function TodayView({ s, now }: { s: StudyIndex; now: Date }) {
           </section>
 
           <StudyRhythm s={s} now={now} />
+          <WeekPanel s={s} now={now} />
         </div>
 
         <div className="today__col today__col--side">
