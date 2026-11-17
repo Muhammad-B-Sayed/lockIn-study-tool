@@ -95,7 +95,8 @@ export function DataTools() {
         step()
       }
 
-      const topicIds = new Map<string, string>()
+      // Topics already here keep their ids, so links and sessions in the file can point at them.
+      const topicIds = new Map<string, string>(Object.entries(p.existingTopicIds))
       for (const batch of chunk(p.topics, 50)) {
         const created = await topicM.createMany(
           batch.map((t) => ({

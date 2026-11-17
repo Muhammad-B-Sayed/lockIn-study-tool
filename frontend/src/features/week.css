@@ -105,6 +105,9 @@
   font-size: var(--text-sm);
   color: var(--text-2);
   white-space: nowrap;
+  /* one width for every row, so the bars start on the same line */
+  min-width: 6.75rem;
+  text-align: right;
 }
 .week__legend {
   display: flex;

@@ -6,7 +6,7 @@ import { elapsedMs, formatClock, useFocusRun, useTick } from '../app/focusStore'
 import { useTheme } from '../app/theme'
 import { useNow, useStudy } from '../app/useStudy'
 import { Icon, type IconName } from '../ui/Icon'
-import { Menu } from '../ui/Menu'
+import { Menu, type MenuItem } from '../ui/Menu'
 import { Button, Kbd } from '../ui/primitives'
 import { CommandPalette } from './CommandPalette'
 import { FocusCompanion } from '../features/FocusCompanion'
@@ -87,6 +87,26 @@ export function AppShell() {
   useEffect(() => {
     document.title = pageName ? `${pageName} · LockIn` : 'LockIn · Study planner'
   }, [pageName])
+
+  // One account menu, shown from the sidebar on desktop and from the top bar on phones.
+  const accountItems: MenuItem[] = [
+    { label: 'Settings', icon: 'gear', onSelect: () => navigate('/app/settings') },
+    'separator',
+    {
+      label: resolved === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
+      icon: resolved === 'dark' ? 'sun' : 'moon',
+      onSelect: () => setPref(resolved === 'dark' ? 'light' : 'dark'),
+    },
+    'separator',
+    {
+      label: user?.mode === 'demo' ? 'Leave demo' : 'Sign out',
+      icon: 'logout',
+      onSelect: async () => {
+        await auth.signOut()
+        navigate('/')
+      },
+    },
+  ]
 
   return (
     <div className="shell">
@@ -178,24 +198,7 @@ export function AppShell() {
                   <Icon name="chevronDown" size={14} />
                 </button>
               )}
-              items={[
-                { label: 'Settings', icon: 'gear', onSelect: () => navigate('/app/settings') },
-                'separator',
-                {
-                  label: resolved === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
-                  icon: resolved === 'dark' ? 'sun' : 'moon',
-                  onSelect: () => setPref(resolved === 'dark' ? 'light' : 'dark'),
-                },
-                'separator',
-                {
-                  label: user?.mode === 'demo' ? 'Leave demo' : 'Sign out',
-                  icon: 'logout',
-                  onSelect: async () => {
-                    await auth.signOut()
-                    navigate('/')
-                  },
-                },
-              ]}
+              items={accountItems}
             />
           </div>
         </div>
@@ -212,6 +215,17 @@ export function AppShell() {
           <Link to="/app/settings" className="icon-btn" aria-label="Settings">
             <Icon name="gear" />
           </Link>
+          <Menu
+            label={user ? `${user.user.username}${user.mode === 'demo' ? ' (demo)' : ''}` : 'Account'}
+            trigger={(p) => (
+              <button {...p} type="button" className="icon-btn topbar__account" aria-label="Account menu">
+                <span className="user-chip__avatar" aria-hidden>
+                  {(user?.user.username ?? '?').slice(0, 1).toUpperCase()}
+                </span>
+              </button>
+            )}
+            items={accountItems}
+          />
         </div>
       </header>
 

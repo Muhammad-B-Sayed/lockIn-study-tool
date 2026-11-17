@@ -14,6 +14,8 @@ export type ImportPlan = {
   reviewsInFile: number
   /** For each course in the file that already exists here, the existing course id. */
   existingCourseIds: Record<string, string>
+  /** For each topic in the file that already exists in such a course (same title), the existing topic id. */
+  existingTopicIds: Record<string, string>
 }
 
 export type ImportParse = { ok: true; plan: ImportPlan } | { ok: false; error: string }
@@ -109,16 +111,28 @@ export function planImport(text: string, current: Workspace): ImportParse {
     } else courses.push(c)
   }
 
-  // A course that already exists keeps its own topics; the file's copies are left out.
+  // In a course that already exists, a topic with the same title is the same topic and is
+  // left alone. A topic the course lacks is added, which is what completes an import that
+  // stopped partway. Two topics sharing a title pair up with two existing ones in order.
+  const unclaimed = new Map<string, string[]>()
+  for (const t of current.topics) {
+    const key = `${t.courseId}|${norm(t.title)}`
+    const ids = unclaimed.get(key)
+    if (ids) ids.push(t.id)
+    else unclaimed.set(key, [t.id])
+  }
   const topics: Topic[] = []
-  const droppedTopics = new Set<string>()
+  const existingTopicIds: Record<string, string> = {}
   for (const t of file.topics) {
-    if (existingCourseIds[t.courseId]) {
-      droppedTopics.add(t.id)
+    const existingCourse = existingCourseIds[t.courseId]
+    const match = existingCourse ? unclaimed.get(`${existingCourse}|${norm(t.title)}`)?.shift() : undefined
+    if (match) {
+      existingTopicIds[t.id] = match
       skipped.topics += 1
     } else topics.push(t)
   }
-  const keptTopics = new Set(topics.map((t) => t.id))
+  // Topic ids from the file that will exist after the import, new or already here.
+  const keptTopics = new Set([...topics.map((t) => t.id), ...Object.keys(existingTopicIds)])
 
   const haveAssessments = new Set(current.assessments.map((a) => assessmentKey(a, a.courseId)))
   const assessments: Assessment[] = []
@@ -141,7 +155,7 @@ export function planImport(text: string, current: Workspace): ImportParse {
   const fileCourseIds = new Set(file.courses.map((c) => c.id))
   const sessions: StudySession[] = []
   for (const s of file.sessions) {
-    // A session on a topic that is being left out moves up to its course.
+    // A session on a topic the file no longer holds moves up to its course.
     const topicId = s.topicId && keptTopics.has(s.topicId) ? s.topicId : null
     const owner = (s.topicId ? fileTopicCourse.get(s.topicId) : undefined) ?? s.courseId
     const fileCourse = owner && fileCourseIds.has(owner) ? owner : null
@@ -155,7 +169,7 @@ export function planImport(text: string, current: Workspace): ImportParse {
 
   return {
     ok: true,
-    plan: { courses, topics, assessments, events, sessions, skipped, reviewsInFile: file.reviews.length, existingCourseIds },
+    plan: { courses, topics, assessments, events, sessions, skipped, reviewsInFile: file.reviews.length, existingCourseIds, existingTopicIds },
   }
 }
 

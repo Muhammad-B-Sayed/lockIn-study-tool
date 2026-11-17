@@ -44,6 +44,21 @@
 .swatch:hover {
   transform: scale(1.08);
 }
+/* the swatch keeps its size; the area that takes a tap grows to about 44px */
+.swatch {
+  position: relative;
+}
+.swatch::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+@media (pointer: coarse) {
+  .swatch {
+    width: 36px;
+    height: 36px;
+  }
+}
 .swatch[aria-checked='true'] {
   box-shadow:
     0 0 0 2px var(--surface),

@@ -12,17 +12,28 @@ import './forms.css'
 const COLORS: ColorKey[] = ['ember', 'amber', 'moss', 'teal', 'sky', 'iris', 'orchid', 'slate']
 const KINDS: AssessmentKind[] = ['assignment', 'exam', 'quiz', 'project', 'task']
 
-function ColorPicker({ value, onChange }: { value: ColorKey; onChange: (c: ColorKey) => void }) {
+const COLOR_NAMES: Record<ColorKey, string> = {
+  ember: 'Red',
+  amber: 'Amber',
+  moss: 'Green',
+  teal: 'Teal',
+  sky: 'Blue',
+  iris: 'Indigo',
+  orchid: 'Pink',
+  slate: 'Grey',
+}
+
+function ColorPicker({ value, onChange, id }: { value: ColorKey; onChange: (c: ColorKey) => void; id?: string }) {
   return (
-    <div className="swatches" role="radiogroup" aria-label="Color">
+    <div className="swatches" role="radiogroup" aria-label="Color" id={id} tabIndex={-1}>
       {COLORS.map((c) => (
         <button
           key={c}
           type="button"
           role="radio"
           aria-checked={value === c}
-          aria-label={c}
-          title={c}
+          aria-label={COLOR_NAMES[c]}
+          title={COLOR_NAMES[c]}
           data-hue={c}
           className="swatch"
           onClick={() => onChange(c)}
@@ -167,7 +178,7 @@ function CourseDialogBody({
           </Field>
         </div>
         <Field label="Color" htmlFor={`${id}-color`}>
-          <ColorPicker value={color} onChange={setColor} />
+          <ColorPicker id={`${id}-color`} value={color} onChange={setColor} />
         </Field>
         <div className="form-row">
           <Field label="Instructor" htmlFor={`${id}-inst`} optional>
@@ -497,7 +508,7 @@ function EventDialogBody({
           </Field>
         </div>
         <Field label="Color" htmlFor={`${id}-c`}>
-          <ColorPicker value={color} onChange={setColor} />
+          <ColorPicker id={`${id}-c`} value={color} onChange={setColor} />
         </Field>
       </form>
     </Dialog>

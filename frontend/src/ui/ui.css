@@ -21,6 +21,11 @@
     box-shadow var(--dur-2) var(--ease-out);
   user-select: none;
 }
+/* an icon never gives up its width when the label is tight on space */
+.btn > svg,
+.btn > .spinner {
+  flex: none;
+}
 .btn:active:not(:disabled) {
   transform: translateY(1px) scale(0.985);
 }
@@ -469,6 +474,23 @@
 }
 .dialog__foot .spacer {
   flex: 1;
+}
+/* asks before Escape or a backdrop click throws away typed input */
+.dialog__guard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem 0.6rem 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+  background: var(--danger-soft);
+}
+.dialog__guard-q {
+  flex: 1;
+  min-width: 10rem;
+  font-size: var(--text-sm);
+  font-weight: 520;
+  color: var(--text);
 }
 /* A confirmation has no body of its own: do not leave an empty block above the buttons. */
 .dialog__body:has(> .sr-only:only-child) {

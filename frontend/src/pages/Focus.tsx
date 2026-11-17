@@ -206,8 +206,8 @@ function Running({ s, run, onFinish }: { s: StudyIndex; run: FocusRun; onFinish:
   return (
     <FocusFrame progress={ms / goalMs} hue={course?.color}>
       <div className="focus__top">
-        <Button variant="ghost" size="sm" icon="arrowLeft" onClick={() => navigate('/app')} title="The timer keeps running">
-          Leave running
+        <Button variant="ghost" size="sm" icon="arrowLeft" onClick={() => navigate('/app')} title="Back to Today. The timer keeps running." aria-label="Back to Today. The timer keeps running.">
+          Back
         </Button>
         <span className="focus__status t-mono" data-paused={run.pausedAt ? 'true' : undefined}>
           <span className="focus__dot" aria-hidden />

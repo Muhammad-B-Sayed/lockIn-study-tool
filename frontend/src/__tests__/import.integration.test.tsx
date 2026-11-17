@@ -55,6 +55,33 @@ describe('JSON import in the demo', () => {
     expect(persisted().topics).toHaveLength(seed.topics.length + 2)
   })
 
+  it('finishes a course that an earlier import left half done, without duplicating what is there', async () => {
+    const { user } = renderDemo('/app/settings')
+    // What a first attempt leaves behind when it stops after the first topic.
+    const partial: Workspace = { ...backup, topics: [backup.topics[0]], assessments: [], events: [], sessions: [] }
+    await chooseFile(user, JSON.stringify(partial))
+    await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Import' }))
+    await waitFor(() => expect(persisted().topics.find((t) => t.title === 'First imported topic')?.lastReviewedAt).toBe('2026-10-20T15:00:00.000Z'))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    const firstId = persisted().topics.find((t) => t.title === 'First imported topic')!.id
+
+    await chooseFile(user, JSON.stringify(backup))
+    const dialog = within(await screen.findByRole('dialog'))
+    expect(dialog.getByText(/1 topic,/)).toBeInTheDocument()
+    await user.click(dialog.getByRole('button', { name: 'Import' }))
+    await waitFor(() => expect(persisted().sessions.some((x) => x.note === 'redo example 3')).toBe(true))
+
+    const ws = persisted()
+    const courses = ws.courses.filter((c) => c.code === 'TST100')
+    expect(courses).toHaveLength(1)
+    expect(ws.topics.filter((t) => t.title === 'First imported topic').map((t) => t.id)).toEqual([firstId])
+    const second = ws.topics.find((t) => t.title === 'Second imported topic')!
+    expect(second.courseId).toBe(courses[0].id)
+    expect(ws.assessments.find((a) => a.title === 'Imported quiz')).toMatchObject({ courseId: courses[0].id, topicIds: [second.id] })
+    expect(ws.sessions.find((x) => x.note === 'redo example 3')).toMatchObject({ topicId: firstId, courseId: courses[0].id })
+    expect(ws.topics).toHaveLength(seed.topics.length + 2)
+  })
+
   it('refuses a file with an invalid record and writes nothing', async () => {
     const { user } = renderDemo('/app/settings')
     const broken = { ...backup, topics: [{ ...backup.topics[0], title: '' }] }

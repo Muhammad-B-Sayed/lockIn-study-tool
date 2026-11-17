@@ -670,6 +670,13 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+/* no hover on touch: a dotted underline says the title opens the editor */
+@media (hover: none) {
+  .deadline-row__title--btn {
+    text-decoration: underline dotted var(--text-3);
+    text-underline-offset: 4px;
+  }
+}
 
 @media (hover: hover) and (pointer: fine) and (min-width: 641px) {
   .review-row__focus .btn__label {

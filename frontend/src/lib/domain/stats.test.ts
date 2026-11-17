@@ -102,4 +102,34 @@ describe('planImport', () => {
     if (!result.ok) throw new Error(result.error)
     expect(result.plan).toMatchObject({ courses: [], topics: [], assessments: [], sessions: [], skipped: { courses: 1, topics: 1, assessments: 1, sessions: 1 } })
   })
+  it('finishes an import that stopped partway: adds the topics an existing course lacks and keeps links to the ones it has', () => {
+    const full = workspace({
+      topics: [topic(), topic({ id: 'tlb', title: 'TLBs', position: 1 }), topic({ id: 'swap', title: 'Swapping', position: 2 })],
+      assessments: [assessment({ topicIds: ['paging', 'tlb', 'swap'] })],
+      sessions: [
+        { ...session('2026-11-05', 40), id: 's1', topicId: 'paging', courseId: 'csc369' },
+        { ...session('2026-11-06', 30), id: 's2', topicId: 'swap', courseId: 'csc369' },
+      ],
+    })
+    // The first attempt created the course and one topic, under new ids, then failed.
+    const here = workspace({ courses: [course({ id: 'here-course' })], topics: [topic({ id: 'here-paging', courseId: 'here-course', title: ' paging ' })] })
+    const result = planImport(JSON.stringify(full), here)
+    if (!result.ok) throw new Error(result.error)
+    const { plan } = result
+    expect(plan.courses).toEqual([])
+    expect(plan.existingCourseIds).toEqual({ csc369: 'here-course' })
+    expect(plan.existingTopicIds).toEqual({ paging: 'here-paging' })
+    expect(plan.topics.map((t) => t.id)).toEqual(['tlb', 'swap'])
+    expect(plan.assessments[0].topicIds).toEqual(['paging', 'tlb', 'swap'])
+    expect(plan.sessions.map((s) => [s.topicId, s.courseId])).toEqual([['paging', 'csc369'], ['swap', 'csc369']])
+    expect(plan.skipped).toMatchObject({ courses: 1, topics: 1 })
+  })
+  it('pairs repeated titles one to one, so a second copy in the file is added and not merged', () => {
+    const twice = workspace({ topics: [topic({ id: 'a', title: 'Review' }), topic({ id: 'b', title: 'Review', position: 1 })] })
+    const here = workspace({ topics: [topic({ id: 'only', title: 'Review' })] })
+    const result = planImport(JSON.stringify(twice), here)
+    if (!result.ok) throw new Error(result.error)
+    expect(result.plan.existingTopicIds).toEqual({ a: 'only' })
+    expect(result.plan.topics.map((t) => t.id)).toEqual(['b'])
+  })
 })
