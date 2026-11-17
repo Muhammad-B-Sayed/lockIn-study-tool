@@ -40,7 +40,7 @@ export default function Settings() {
       <header className="page-head">
         <div>
           <h1 className="page-head__title t-display">Settings</h1>
-          <p className="page-head__sub">{demo ? 'Appearance, your demo data and shortcuts.' : 'Appearance, your account and your data.'}</p>
+          <p className="page-head__sub">{demo ? 'Appearance, your demo data, study goals and shortcuts.' : 'Appearance, your account, your data and study goals.'}</p>
         </div>
       </header>
 

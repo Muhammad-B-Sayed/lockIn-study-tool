@@ -166,6 +166,36 @@ export function DataTools() {
     <>
       <section className="srow">
         <div className="srow__text">
+          <h2 className="srow__title">Import</h2>
+          <p className="srow__body">Add the contents of a file made with Export data. It only adds. Nothing you have now is changed or deleted.</p>
+          {fileError ? (
+            <p className="dtools__error" role="alert">
+              {fileError}
+            </p>
+          ) : null}
+        </div>
+        <div className="srow__control">
+          <input ref={fileRef} type="file" accept="application/json,.json" className="sr-only" tabIndex={-1} aria-hidden onChange={chooseFile} />
+          <Button variant="secondary" icon="import" onClick={() => fileRef.current?.click()} disabled={!ws}>
+            Import data
+          </Button>
+        </div>
+      </section>
+
+      <section className="srow">
+        <div className="srow__text">
+          <h2 className="srow__title">Calendar file</h2>
+          <p className="srow__body">Download open deadlines, planned topics and your events as an .ics file for Google Calendar, Apple Calendar or Outlook.</p>
+        </div>
+        <div className="srow__control">
+          <Button variant="secondary" icon="calendar" onClick={exportCalendar} disabled={!ws}>
+            Export calendar
+          </Button>
+        </div>
+      </section>
+
+      <section className="srow">
+        <div className="srow__text">
           <h2 className="srow__title">Daily goal</h2>
           <p className="srow__body">Minutes of study to aim for each day. Today shows your progress. Saved on this device only.</p>
         </div>
@@ -208,36 +238,6 @@ export function DataTools() {
                 </option>
               ))}
           </Select>
-        </div>
-      </section>
-
-      <section className="srow">
-        <div className="srow__text">
-          <h2 className="srow__title">Calendar file</h2>
-          <p className="srow__body">Download open deadlines, planned topics and your events as an .ics file for Google Calendar, Apple Calendar or Outlook.</p>
-        </div>
-        <div className="srow__control">
-          <Button variant="secondary" icon="calendar" onClick={exportCalendar} disabled={!ws}>
-            Export calendar
-          </Button>
-        </div>
-      </section>
-
-      <section className="srow">
-        <div className="srow__text">
-          <h2 className="srow__title">Import</h2>
-          <p className="srow__body">Add the contents of a file made with Export data. It only adds. Nothing you have now is changed or deleted.</p>
-          {fileError ? (
-            <p className="dtools__error" role="alert">
-              {fileError}
-            </p>
-          ) : null}
-        </div>
-        <div className="srow__control">
-          <input ref={fileRef} type="file" accept="application/json,.json" className="sr-only" tabIndex={-1} aria-hidden onChange={chooseFile} />
-          <Button variant="secondary" icon="import" onClick={() => fileRef.current?.click()} disabled={!ws}>
-            Import data
-          </Button>
         </div>
       </section>
 
