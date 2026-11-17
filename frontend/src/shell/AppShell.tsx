@@ -13,6 +13,9 @@ import { FocusCompanion } from '../features/FocusCompanion'
 import { Wordmark } from './Wordmark'
 import { ignoreShortcut } from '../app/keys'
 import { useGoToKeys } from '../app/useGoToKeys'
+import { shouldAutoStart, startTour } from '../app/tourStore'
+import { exitExample, useExampleMode } from '../app/exampleStore'
+import { Tour } from '../features/Tour'
 import './shell.css'
 
 const NAV: { to: string; label: string; icon: IconName; end?: boolean }[] = [
@@ -73,6 +76,30 @@ export function AppShell() {
   }, [location.pathname])
 
   const user = auth.state.status === 'signed-in' ? auth.state : null
+  const example = useExampleMode()
+  const leaveExample = () => {
+    navigate('/app/settings')
+    exitExample()
+  }
+
+  // A new user gets the guided tour once, after their workspace has loaded.
+  const userId = user?.user.id ?? null
+  const ready = !!data
+  useEffect(() => {
+    if (!user || !ready || example) return
+    const eligible = shouldAutoStart({
+      userId: user.user.id,
+      mode: user.mode,
+      createdAt: user.user.createdAt,
+      courseCount: data?.ws.courses.length ?? 0,
+      now: Date.now(),
+    })
+    if (!eligible) return
+    const t = window.setTimeout(startTour, 700)
+    return () => window.clearTimeout(t)
+    // Once per signed-in user; later data changes must not restart it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, ready])
   const topicMatch = location.pathname.match(/^\/app\/topics\/([^/]+)/)
   const onTopic = !!topicMatch
   const topicCourseId = topicMatch ? data?.topicById.get(topicMatch[1])?.courseId : undefined
@@ -91,6 +118,7 @@ export function AppShell() {
   // One account menu, shown from the sidebar on desktop and from the top bar on phones.
   const accountItems: MenuItem[] = [
     { label: 'Settings', icon: 'gear', onSelect: () => navigate('/app/settings') },
+    { label: 'Take the tour', icon: 'sparkle', onSelect: startTour },
     'separator',
     {
       label: resolved === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
@@ -98,14 +126,16 @@ export function AppShell() {
       onSelect: () => setPref(resolved === 'dark' ? 'light' : 'dark'),
     },
     'separator',
-    {
-      label: user?.mode === 'demo' ? 'Leave demo' : 'Sign out',
-      icon: 'logout',
-      onSelect: async () => {
-        await auth.signOut()
-        navigate('/')
-      },
-    },
+    example
+      ? { label: 'Back to my workspace', icon: 'arrowLeft', onSelect: leaveExample }
+      : {
+          label: user?.mode === 'demo' ? 'Leave demo' : 'Sign out',
+          icon: 'logout',
+          onSelect: async () => {
+            await auth.signOut()
+            navigate('/')
+          },
+        },
   ]
 
   return (
@@ -121,7 +151,7 @@ export function AppShell() {
           </Link>
         </div>
 
-        <button type="button" className="sidebar__search" onClick={() => setPaletteOpen(true)}>
+        <button type="button" className="sidebar__search" data-tour="search" onClick={() => setPaletteOpen(true)}>
           <Icon name="search" size={16} />
           <span>Search or add</span>
           <span className="sidebar__keys">
@@ -136,6 +166,7 @@ export function AppShell() {
               key={n.to}
               to={n.to}
               end={n.end}
+              data-tour={`nav-${n.label.toLowerCase()}`}
               className={({ isActive }) => ['nav__item', isActive || (n.to === '/app/courses' && onTopic) ? 'active' : ''].join(' ')}
             >
               <Icon name={n.icon} size={18} />
@@ -193,7 +224,7 @@ export function AppShell() {
                   </span>
                   <span className="user-chip__name">
                     {user?.user.username ?? 'Guest'}
-                    {user?.mode === 'demo' ? <span className="user-chip__badge">Demo</span> : null}
+                    {example ? <span className="user-chip__badge">Example</span> : user?.mode === 'demo' ? <span className="user-chip__badge">Demo</span> : null}
                   </span>
                   <Icon name="chevronDown" size={14} />
                 </button>
@@ -209,14 +240,14 @@ export function AppShell() {
           <Wordmark />
         </Link>
         <div className="topbar__actions">
-          <button type="button" className="icon-btn" aria-label="Search or add" onClick={() => setPaletteOpen(true)}>
+          <button type="button" className="icon-btn" aria-label="Search or add" data-tour="search" onClick={() => setPaletteOpen(true)}>
             <Icon name="search" />
           </button>
           <Link to="/app/settings" className="icon-btn" aria-label="Settings">
             <Icon name="gear" />
           </Link>
           <Menu
-            label={user ? `${user.user.username}${user.mode === 'demo' ? ' (demo)' : ''}` : 'Account'}
+            label={user ? `${user.user.username}${example ? ' (example)' : user.mode === 'demo' ? ' (demo)' : ''}` : 'Account'}
             trigger={(p) => (
               <button {...p} type="button" className="icon-btn topbar__account" aria-label="Account menu">
                 <span className="user-chip__avatar" aria-hidden>
@@ -230,6 +261,17 @@ export function AppShell() {
       </header>
 
       <main id="main" className="main">
+        {example ? (
+          <div className="example-bar" role="status">
+            <Icon name="lock" size={16} />
+            <p>
+              <strong>View-only example.</strong> <span>This is how a term looks once it is set up. Nothing here is saved.</span>
+            </p>
+            <Button size="sm" variant="secondary" icon="arrowLeft" onClick={leaveExample}>
+              Back to my workspace
+            </Button>
+          </div>
+        ) : null}
         {error && !data ? (
           <LoadError message={error.message} retrying={isFetching} onRetry={() => void refetch()} />
         ) : (
@@ -241,7 +283,7 @@ export function AppShell() {
 
       <nav className="tabbar" aria-label="Primary">
         {NAV.slice(0, 2).map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.end} className="tabbar__item">
+          <NavLink key={n.to} to={n.to} end={n.end} className="tabbar__item" data-tour={`nav-${n.label.toLowerCase()}`}>
             <Icon name={n.icon} size={20} />
             <span>{n.label}</span>
             {n.label === 'Review' && reviewCount > 0 ? (
@@ -257,6 +299,7 @@ export function AppShell() {
             key={n.to}
             to={n.to}
             end={n.end}
+            data-tour={`nav-${n.label.toLowerCase()}`}
             className={({ isActive }) => ['tabbar__item', isActive || (n.to === '/app/courses' && onTopic) ? 'active' : ''].join(' ')}
           >
             <Icon name={n.icon} size={20} />
@@ -267,6 +310,7 @@ export function AppShell() {
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <FocusCompanion />
+      <Tour userId={userId} />
     </div>
   )
 }
@@ -276,7 +320,7 @@ function FocusCta() {
   const now = useTick(!!run && !run.pausedAt)
   if (run) {
     return (
-      <Link to="/app/focus" className="focus-pill" data-paused={run.pausedAt ? 'true' : undefined}>
+      <Link to="/app/focus" className="focus-pill" data-tour="focus" data-paused={run.pausedAt ? 'true' : undefined}>
         <span className="focus-pill__pulse" aria-hidden />
         <span className="focus-pill__label">{run.pausedAt ? 'Paused' : 'Locked in'}</span>
         <span className="focus-pill__time t-mono tabular">{formatClock(elapsedMs(run, now))}</span>
@@ -284,7 +328,7 @@ function FocusCta() {
     )
   }
   return (
-    <Link to="/app/focus" className="lock-cta">
+    <Link to="/app/focus" className="lock-cta" data-tour="focus">
       <Icon name="timer" size={18} />
       <span>Lock in</span>
       <span className="lock-cta__hint">Start a focus session</span>
@@ -295,7 +339,7 @@ function FocusCta() {
 function TabbarLock() {
   const run = useFocusRun()
   return (
-    <NavLink to="/app/focus" className="tabbar__lock" data-running={run ? 'true' : undefined}>
+    <NavLink to="/app/focus" className="tabbar__lock" data-tour="focus" data-running={run ? 'true' : undefined}>
       <span className="tabbar__lock-circle">
         <Icon name="timer" size={22} />
       </span>

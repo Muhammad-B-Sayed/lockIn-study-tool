@@ -126,6 +126,8 @@ export async function runScreens(config, visit) {
               if (!signedOut) localStorage.setItem('lockin.session.v1', JSON.stringify({ mode: 'demo' }))
               else localStorage.removeItem('lockin.session.v1')
               localStorage.setItem('lockin.theme', selectedTheme)
+              // The first-run tour would cover every screen; the tour states start it on purpose.
+              localStorage.setItem('lockin.tour.optout', '1')
             }, { theme, signedOut: !!screen.signedOut })
             const response = await page.goto(`${base}${screen.path}`, { waitUntil: 'domcontentloaded' })
             if (response && !response.ok()) console.warn(`${screen.name}: HTTP ${response.status()}`)

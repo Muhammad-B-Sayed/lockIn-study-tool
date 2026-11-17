@@ -6,6 +6,8 @@ import { Button, Dialog, Field, Input, Segmented } from '../ui/primitives'
 import { errorMessage, useToast } from '../ui/toastContext'
 import { Kbd } from '../ui/primitives'
 import { DataTools } from '../features/DataTools'
+import { startTour } from '../app/tourStore'
+import { enterExample, exitExample, useExampleMode } from '../app/exampleStore'
 import './settings.css'
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
@@ -19,6 +21,7 @@ export default function Settings() {
   const [confirm, setConfirm] = useState<'delete' | 'reset' | null>(null)
   const [busy, setBusy] = useState(false)
   const demo = auth.state.status === 'signed-in' && auth.state.mode === 'demo'
+  const example = useExampleMode()
   const user = auth.state.status === 'signed-in' ? auth.state.user : null
 
   const exportData = async () => {
@@ -40,7 +43,7 @@ export default function Settings() {
       <header className="page-head">
         <div>
           <h1 className="page-head__title t-display">Settings</h1>
-          <p className="page-head__sub">{demo ? 'Appearance, your demo data, study goals and shortcuts.' : 'Appearance, your account, your data and study goals.'}</p>
+          <p className="page-head__sub">{example ? 'This example is view-only. Your own settings and data are unchanged.' : demo ? 'Appearance, your demo data, study goals and shortcuts.' : 'Appearance, your account, your data and study goals.'}</p>
         </div>
       </header>
 
@@ -58,6 +61,20 @@ export default function Settings() {
           />
         </Row>
 
+        {example ? (
+          <Row title="Example workspace" body="You are looking at sample courses in view-only mode. Nothing you do here is saved.">
+            <Button
+              variant="primary"
+              icon="arrowLeft"
+              onClick={() => {
+                navigate('/app/settings')
+                exitExample()
+              }}
+            >
+              Back to my workspace
+            </Button>
+          </Row>
+        ) : (
         <Row title="Account" body={demo ? 'You are in the demo. Everything lives in this browser only.' : `Signed in as ${user?.username ?? ''}.`}>
           <Button
             variant="secondary"
@@ -70,16 +87,24 @@ export default function Settings() {
             {demo ? 'Leave demo' : 'Sign out'}
           </Button>
         </Row>
+        )}
 
         {!demo ? <PasswordRow onChange={async (current, next) => { await account.changePassword(current, next) }} /> : null}
 
-        <Row title="Export" body="Download every course, topic, deadline, review and session as JSON.">
-          <Button variant="secondary" icon="download" onClick={exportData}>
-            Export data
-          </Button>
-        </Row>
+        {/* The example is view-only, so its data rows and per-device preferences stay hidden. */}
+        {example ? null : (
+          <>
+            <Row title="Export" body="Download every course, topic, deadline, review and session as JSON.">
+              <Button variant="secondary" icon="download" onClick={exportData}>
+                Export data
+              </Button>
+            </Row>
 
-        <DataTools />
+            <DataTools />
+          </>
+        )}
+
+        <HelpRow demo={demo} example={example} />
 
         <Row title="Keyboard" body="Work without the mouse." className="kbd-hint">
           <dl className="keys">
@@ -122,6 +147,7 @@ export default function Settings() {
           </dl>
         </Row>
 
+        {example ? null : (
         <div className="settings__danger">
           {demo ? (
             <Row title="Reset demo" body="Start over with fresh sample courses. Your demo changes are lost.">
@@ -137,6 +163,7 @@ export default function Settings() {
             </Row>
           )}
         </div>
+        )}
       </div>
 
       <Dialog
@@ -184,6 +211,73 @@ export default function Settings() {
         <span className="sr-only">Confirm</span>
       </Dialog>
     </div>
+  )
+}
+
+function HelpRow({ demo, example }: { demo: boolean; example: boolean }) {
+  const navigate = useNavigate()
+  const faq: { q: string; a: string }[] = [
+    {
+      q: 'What should I do first?',
+      a: 'Add a course from Courses, then choose Import syllabus on its page. Paste the schedule and LockIn drafts topics and deadlines that you check before saving.',
+    },
+    {
+      q: 'How does LockIn pick what to review?',
+      a: 'Each rating sets when a topic comes back: Shaky after a day, Getting there after three days, Solid after a week. Overdue, weak and soon-to-be-tested topics rank higher.',
+    },
+    {
+      q: 'What does “Not on exam” do?',
+      a: 'It keeps the topic and its notes but takes it out of the review queue. Use it for material your course will not test.',
+    },
+    {
+      q: 'How do I add things quickly?',
+      a: `Open search with ${isMac ? '⌘K' : 'Ctrl+K'} or the search button, then type a line like “csc369 midterm nov 12”. LockIn reads the course, the type and the date.`,
+    },
+    {
+      q: 'Where is my data saved?',
+      a: demo
+        ? 'In the demo, everything stays in this browser. Create an account to keep your work across devices.'
+        : 'Courses, topics, deadlines, ratings and sessions are saved to your account. Grade scores, the daily goal and timer lengths are saved on this device only.',
+    },
+  ]
+  return (
+    <section className="srow srow--help" aria-labelledby="help-h">
+      <div className="srow__text">
+        <h2 id="help-h" className="srow__title">
+          Help
+        </h2>
+        <p className="srow__body">
+          {example
+            ? 'New here, or want a refresher? The tour shows the main features in about a minute.'
+            : 'The tour shows the main features in about a minute. The example opens a filled-in, view-only workspace so you can see how a term looks once it is set up.'}
+        </p>
+      </div>
+      <div className="srow__control help-actions">
+        {!example ? (
+          <Button
+            variant="secondary"
+            icon="external"
+            onClick={() => {
+              enterExample()
+              navigate('/app')
+            }}
+          >
+            View an example
+          </Button>
+        ) : null}
+        <Button variant="secondary" icon="sparkle" onClick={startTour}>
+          Take the tour
+        </Button>
+      </div>
+      <div className="help-faq">
+        {faq.map((item) => (
+          <details key={item.q} className="help-faq__item">
+            <summary>{item.q}</summary>
+            <p>{item.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
   )
 }
 

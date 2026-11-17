@@ -28,6 +28,7 @@ Open `http://127.0.0.1:5173` and choose **Try the demo**. It starts with realist
 - Settings exports the plan as an .ics calendar file and imports a JSON export. Import only adds: it validates the whole file first and skips what is already there.
 - Daily goal, break length, grade scores and grade targets are saved per device in the browser, not in the account.
 - Keyboard: `g` then `t`, `r`, `c`, `o`, `f` or `s` jumps to Today, Review, Calendar, Courses, Focus or Settings.
+- A six-step guided tour runs once for new users. Settings has a Help section to replay it, with short answers to common questions, and a "View an example" button that opens a filled-in sample workspace in view-only mode. The example lives in memory, refuses every edit, and leaves the signed-in account untouched.
 - Light, dark, and system themes work across desktop and mobile layouts.
 - Account mode uses JWT authentication and PostgreSQL persistence. Settings supports password changes, account deletion, and JSON export.
 
