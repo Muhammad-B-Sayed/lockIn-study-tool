@@ -150,7 +150,6 @@ function TodayView({ s, now }: { s: StudyIndex; now: Date }) {
             )}
           </section>
 
-          <StudyRhythm s={s} now={now} />
           <WeekPanel s={s} now={now} />
         </div>
 
@@ -223,7 +222,7 @@ function TodayView({ s, now }: { s: StudyIndex; now: Date }) {
             </ul>
             <ConfidenceKey withRetired={s.ws.topics.some((t) => t.confidence === 'retired')} />
           </section>
-
+          <StudyRhythm s={s} now={now} />
         </div>
       </div>
     </div>
