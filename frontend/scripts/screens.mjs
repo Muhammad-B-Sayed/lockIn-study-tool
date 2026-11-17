@@ -24,6 +24,12 @@ export const screens = [
   { name: 'edit-deadline', path: '/app/courses/course-csc369', setup: async page => { await page.locator('.deadline-row__title--btn').first().click(); await page.getByRole('button', { name: 'Delete', exact: true }).click(); await page.waitForTimeout(300) } },
   { name: 'reset-demo', path: '/app/settings', setup: async page => { await page.getByRole('button', { name: 'Reset demo' }).click(); await page.waitForTimeout(300) } },
   { name: 'dialog-guard', path: '/app/courses/course-csc369', setup: async page => { await page.getByRole('button', { name: 'More options' }).click(); await page.getByRole('menuitem', { name: 'Add deadline' }).click(); await page.getByRole('textbox', { name: 'Title', exact: true }).fill('Lab 4'); await page.keyboard.press('Escape'); await page.waitForTimeout(300) } },
+  { name: 'tour-1', path: '/app/settings', setup: page => tourTo(page, 0) },
+  { name: 'tour-2', path: '/app/settings', setup: page => tourTo(page, 1) },
+  { name: 'tour-3', path: '/app/settings', setup: page => tourTo(page, 2) },
+  { name: 'tour-4', path: '/app/settings', setup: page => tourTo(page, 3) },
+  { name: 'tour-5', path: '/app/settings', setup: page => tourTo(page, 4) },
+  { name: 'tour-6', path: '/app/settings', setup: page => tourTo(page, 5) },
   { name: 'new-deadline', path: '/app/courses/course-csc369', setup: async page => { await page.getByRole('button', { name: 'More options' }).click(); await page.getByRole('menuitem', { name: 'Add deadline' }).click(); await page.waitForTimeout(300) } },
 ]
 
@@ -34,3 +40,12 @@ async function openFirstLink(page, prefix) {
   else console.warn(`No ${prefix} link yet; capturing the parent route.`)
 }
 
+/** Start the guided tour from Settings and step forward n times. */
+async function tourTo(page, n) {
+  await page.getByRole('button', { name: 'Take the tour' }).click()
+  for (let i = 0; i < n; i++) {
+    await page.waitForTimeout(450)
+    await page.locator('.tour__card .btn--primary').click()
+  }
+  await page.waitForTimeout(800)
+}

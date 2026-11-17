@@ -6,6 +6,7 @@ import { formatDate } from '../app/format'
 import { useNow, useStudy } from '../app/useStudy'
 import { useTheme } from '../app/theme'
 import { useExportCalendar } from '../features/useExportCalendar'
+import { startTour } from '../app/tourStore'
 import { Icon, type IconName } from '../ui/Icon'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { CourseTag } from '../ui/study'
@@ -170,6 +171,16 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
         run: () => {
           onClose()
           setPref(dark ? 'light' : 'dark')
+        },
+      },
+      {
+        id: 'tour',
+        label: 'Take the tour',
+        icon: 'sparkle',
+        keywords: 'help tour guide walkthrough onboarding how to start',
+        run: () => {
+          onClose()
+          startTour()
         },
       },
       {
