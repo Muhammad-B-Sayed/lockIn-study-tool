@@ -40,6 +40,12 @@ Screenshots viewed by the new lead, most after the changes:
 | topic | 390 and 1440 | dark |
 | dialog-guard | 390 | light |
 
+Later, by the new lead:
+
+- Settings rows run Export, Import, Calendar file, Daily goal, Break length. The subtitle mentions study goals.
+
+Final check at 2:31 AM on the last commit: `npx tsc -b`, `npx eslint .`, `npx vitest run` (513 of 513) and `npm run build` all pass. No screenshot, preview or browser process is left running. The sprint is wrapped up. The open decisions below still need the owner.
+
 Not done from round 2: the 8-week trend. Rhythm already shows 21 days, so it was dropped as redundant.
 
 ## What the owner asked for
