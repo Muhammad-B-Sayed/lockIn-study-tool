@@ -2,6 +2,46 @@
 
 Written at 2:19 AM Toronto time on 2026-11-17 by the lead agent. Read this if you are taking over the sprint. Delete this file before the branch merges.
 
+## Status at 2:30 AM (read this first)
+
+Both delegates died on a 429 rate limit at about 2:21 AM. The `claudeAgent_hub_mdude` account resets around 6:50 AM. They were not restarted. A new lead (Claude Opus 5.5 on the `claudeAgent_hub_outlook` account, started by the owner) took over at 2:22 AM and did the remaining work directly, with no delegates.
+
+What the new lead did:
+
+- Recovered the delegates' half-done round 2 work. It typechecked, so it was kept and committed as `3f0bf55`. It contains:
+  - import now completes a course that a failed earlier import left half-done, with two new tests
+  - dialogs ask "Discard what you typed?" on Escape or a backdrop click after typing
+  - phones get an account menu in the top bar
+  - colour swatches have readable names
+  - the running Focus screen says "Back"
+- Fixed a bug in that guard: a dialog closed by Cancel or Save could reopen with the question still showing.
+- Calendar page: an "Export .ics" button in the legend row (`src/features/useExportCalendar.ts`, shared with Settings).
+- Command palette: searching also matches topic notes and summaries, marked "Matches your notes". Settings is found by "import", "ics", "goal" and "break".
+- Today: deadline titles open the edit dialog, as they do on a course page.
+- Today, desktop: Rhythm moved under This term, so the two columns are balanced. The phone order is unchanged.
+- Grade panel: shows "No scores yet" instead of a large "--%" placeholder.
+- Topic page: "Log time" sits under the focused total, and sessions with no note say "Study session".
+- `scripts/screens.mjs`: a `dialog-guard` state.
+
+Checked at 2:29 AM on `2a6f5e5`:
+
+- `npx tsc -b`, `npx eslint .` and `npx vitest run` pass, 513 of 513.
+- The production build passes, since the screenshot script builds it.
+
+Screenshots viewed by the new lead, most after the changes:
+
+| Screen | Width | Theme |
+|---|---|---|
+| today | 390 and 1440 | dark and light |
+| course | 390 and 1440 | dark and light |
+| focus, focus-running | 390 | dark |
+| settings | 390 | dark |
+| calendar | 390 and 1440 | light |
+| topic | 390 and 1440 | dark |
+| dialog-guard | 390 | light |
+
+Not done from round 2: the 8-week trend. Rhythm already shows 21 days, so it was dropped as redundant.
+
 ## What the owner asked for
 
 A time-boxed sprint on the LockIn study tool, from about 1:30 AM to 2:45 AM Toronto time. Make as many impactful changes as possible in two areas: features and functionality, and UI/UX. The owner called the existing UI "really dumb UI mistakes" and "non-standard, super unprofessional" without listing specifics.
