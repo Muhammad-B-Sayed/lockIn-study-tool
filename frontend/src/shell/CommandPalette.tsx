@@ -4,6 +4,8 @@ import { useAssessmentMutations, useTopicMutations } from '../lib/data'
 import { parseQuickAdd, today } from '../lib/domain'
 import { formatDate } from '../app/format'
 import { useNow, useStudy } from '../app/useStudy'
+import { useTheme } from '../app/theme'
+import { useExportCalendar } from '../features/useExportCalendar'
 import { Icon, type IconName } from '../ui/Icon'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { CourseTag } from '../ui/study'
@@ -55,6 +57,8 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
   const toast = useToast()
   const topicsM = useTopicMutations()
   const assessM = useAssessmentMutations()
+  const { setPref, resolved } = useTheme()
+  const exportCalendar = useExportCalendar()
 
   useEffect(() => {
     const el = ref.current
@@ -156,6 +160,35 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
         out.push({ id: `page-${p.to}`, group: 'Go to', label: p.label, icon: p.icon, run: go(p.to) })
       }
     }
+    const dark = resolved === 'dark'
+    const actions: { id: string; label: string; icon: IconName; keywords: string; run: () => void }[] = [
+      {
+        id: 'theme',
+        label: dark ? 'Switch to light mode' : 'Switch to dark mode',
+        icon: dark ? 'sun' : 'moon',
+        keywords: 'theme dark light mode appearance',
+        run: () => {
+          onClose()
+          setPref(dark ? 'light' : 'dark')
+        },
+      },
+      {
+        id: 'ics',
+        label: 'Export calendar file',
+        icon: 'download',
+        keywords: 'ics calendar export google apple outlook',
+        run: () => {
+          onClose()
+          exportCalendar()
+        },
+      },
+    ]
+    // Actions show only for a query, so the empty palette stays a list of places.
+    if (query) {
+      for (const a of actions) {
+        if (score(`${a.label} ${a.keywords}`, query)) out.push({ id: `action-${a.id}`, group: 'Actions', label: a.label, icon: a.icon, run: a.run })
+      }
+    }
     if (data) {
       const courses = data.ws.courses
         .map((c) => ({ c, s: Math.max(score(c.code, query), score(c.name, query)) }))
@@ -206,7 +239,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
       }
     }
     return out
-  }, [q, data, now, navigate, onClose, toast, topicsM, assessM])
+  }, [q, data, now, navigate, onClose, toast, topicsM, assessM, resolved, setPref, exportCalendar])
 
   useEffect(() => {
     document.getElementById(`cmd-${items[active]?.id}`)?.scrollIntoView({ block: 'nearest' })
