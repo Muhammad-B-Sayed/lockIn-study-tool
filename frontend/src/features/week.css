@@ -221,3 +221,8 @@
   grid-column: auto;
   margin-bottom: 0;
 }
+/* On the topic page the button sits under the time, aligned with it, not floating mid-line. */
+dd .week__log-btn {
+  display: flex;
+  margin: 0.35rem 0 0 -0.7rem;
+}

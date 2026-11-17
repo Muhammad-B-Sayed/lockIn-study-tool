@@ -56,7 +56,7 @@ export function TopicSessions({ s, topicId, day }: { s: StudyIndex; topicId: str
             <li key={x.id} className="week__entry">
               <span className="week__entry-when tabular">{date === day ? 'Today' : formatDate(date, { month: 'short', day: 'numeric' })}</span>
               <span className="week__entry-main">
-                <span className={x.note ? 'week__entry-quote' : 'week__entry-quote t-faint'}>{x.note ?? 'No note'}</span>
+                <span className={x.note ? 'week__entry-quote' : 'week__entry-quote t-faint'}>{x.note ?? 'Study session'}</span>
               </span>
               <span className="week__entry-min tabular">{formatMinutes(x.minutes)}</span>
               <IconButton icon="trash" size="sm" label={`Remove ${formatMinutes(x.minutes)} session`} onClick={() => removeSession(x)} />
