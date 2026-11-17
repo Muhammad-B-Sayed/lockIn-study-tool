@@ -68,19 +68,23 @@ export function GradesPanel({ course, assessments }: { course: Course; assessmen
         </div>
       </header>
 
-      <div className="grades__top">
-        <p className="grades__big t-display tabular">
-          {summary.current === null ? '--' : trim(summary.current)}
-          <small>%</small>
-        </p>
-        <p className="grades__label">
-          {summary.current === null ? 'No scores yet.' : 'average on graded work.'}
-          <span className="t-faint">
-            {' '}
-            {trim(summary.gradedWeight)}% of the grade is in, worth {trim(summary.earned)} points so far.
-          </span>
-        </p>
-      </div>
+      {summary.current === null ? (
+        <p className="grades__label grades__empty">No scores yet. Add one below to see your weighted average.</p>
+      ) : (
+        <div className="grades__top">
+          <p className="grades__big t-display tabular">
+            {trim(summary.current)}
+            <small>%</small>
+          </p>
+          <p className="grades__label">
+            average on graded work.
+            <span className="t-faint">
+              {' '}
+              {trim(summary.gradedWeight)}% of the grade is in, worth {trim(summary.earned)} points so far.
+            </span>
+          </p>
+        </div>
+      )}
 
       <ul className="grades__list">
         {weighted.map((a) => (
