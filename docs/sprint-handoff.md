@@ -43,6 +43,7 @@ Screenshots viewed by the new lead, most after the changes:
 Later, by the new lead:
 
 - Settings rows run Export, Import, Calendar file, Daily goal, Break length. The subtitle mentions study goals.
+- Command palette: typing "dark", "light" or "ics" offers a theme switch or a calendar export under Actions.
 
 Final check at 2:31 AM on the last commit: `npx tsc -b`, `npx eslint .`, `npx vitest run` (513 of 513) and `npm run build` all pass. No screenshot, preview or browser process is left running. The sprint is wrapped up. The open decisions below still need the owner.
 
