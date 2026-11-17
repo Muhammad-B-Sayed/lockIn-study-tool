@@ -1,8 +1,5 @@
 .settings {
-  max-width: var(--content-max);
-}
-.settings > :not(dialog) {
-  max-width: 780px;
+  max-width: 860px;
 }
 .settings__list {
   display: grid;
