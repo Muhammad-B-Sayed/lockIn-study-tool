@@ -153,3 +153,8 @@
   line-height: var(--leading-body);
   color: var(--text-2);
 }
+.help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

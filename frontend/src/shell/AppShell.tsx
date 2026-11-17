@@ -14,6 +14,7 @@ import { Wordmark } from './Wordmark'
 import { ignoreShortcut } from '../app/keys'
 import { useGoToKeys } from '../app/useGoToKeys'
 import { shouldAutoStart, startTour } from '../app/tourStore'
+import { exitExample, useExampleMode } from '../app/exampleStore'
 import { Tour } from '../features/Tour'
 import './shell.css'
 
@@ -75,12 +76,17 @@ export function AppShell() {
   }, [location.pathname])
 
   const user = auth.state.status === 'signed-in' ? auth.state : null
+  const example = useExampleMode()
+  const leaveExample = () => {
+    navigate('/app/settings')
+    exitExample()
+  }
 
   // A new user gets the guided tour once, after their workspace has loaded.
   const userId = user?.user.id ?? null
   const ready = !!data
   useEffect(() => {
-    if (!user || !ready) return
+    if (!user || !ready || example) return
     const eligible = shouldAutoStart({
       userId: user.user.id,
       mode: user.mode,
@@ -120,14 +126,16 @@ export function AppShell() {
       onSelect: () => setPref(resolved === 'dark' ? 'light' : 'dark'),
     },
     'separator',
-    {
-      label: user?.mode === 'demo' ? 'Leave demo' : 'Sign out',
-      icon: 'logout',
-      onSelect: async () => {
-        await auth.signOut()
-        navigate('/')
-      },
-    },
+    example
+      ? { label: 'Back to my workspace', icon: 'arrowLeft', onSelect: leaveExample }
+      : {
+          label: user?.mode === 'demo' ? 'Leave demo' : 'Sign out',
+          icon: 'logout',
+          onSelect: async () => {
+            await auth.signOut()
+            navigate('/')
+          },
+        },
   ]
 
   return (
@@ -216,7 +224,7 @@ export function AppShell() {
                   </span>
                   <span className="user-chip__name">
                     {user?.user.username ?? 'Guest'}
-                    {user?.mode === 'demo' ? <span className="user-chip__badge">Demo</span> : null}
+                    {example ? <span className="user-chip__badge">Example</span> : user?.mode === 'demo' ? <span className="user-chip__badge">Demo</span> : null}
                   </span>
                   <Icon name="chevronDown" size={14} />
                 </button>
@@ -239,7 +247,7 @@ export function AppShell() {
             <Icon name="gear" />
           </Link>
           <Menu
-            label={user ? `${user.user.username}${user.mode === 'demo' ? ' (demo)' : ''}` : 'Account'}
+            label={user ? `${user.user.username}${example ? ' (example)' : user.mode === 'demo' ? ' (demo)' : ''}` : 'Account'}
             trigger={(p) => (
               <button {...p} type="button" className="icon-btn topbar__account" aria-label="Account menu">
                 <span className="user-chip__avatar" aria-hidden>
@@ -253,6 +261,17 @@ export function AppShell() {
       </header>
 
       <main id="main" className="main">
+        {example ? (
+          <div className="example-bar" role="status">
+            <Icon name="lock" size={16} />
+            <p>
+              <strong>View-only example.</strong> <span>This is how a term looks once it is set up. Nothing here is saved.</span>
+            </p>
+            <Button size="sm" variant="secondary" icon="arrowLeft" onClick={leaveExample}>
+              Back to my workspace
+            </Button>
+          </div>
+        ) : null}
         {error && !data ? (
           <LoadError message={error.message} retrying={isFetching} onRetry={() => void refetch()} />
         ) : (

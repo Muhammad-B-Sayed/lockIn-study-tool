@@ -18,8 +18,12 @@ export type DataProviderProps = {
   initialSession?: StoredSession | null
   queryClient?: QueryClient
   wakeBackend?: boolean
+  /** False keeps session changes in memory, for a workspace shown inside another session. */
+  persistSession?: boolean
+  /** Replaces signing out, for a workspace that should be left rather than signed out of. */
+  onSignOut?: () => void
 }
-export function DataProvider({ children, dataSource, initialSession, queryClient, wakeBackend = true }: DataProviderProps) {
+export function DataProvider({ children, dataSource, initialSession, queryClient, wakeBackend = true, persistSession = true, onSignOut }: DataProviderProps) {
   const [client] = useState(() => queryClient ?? new QueryClient({ defaultOptions: {
     queries: { staleTime: 30_000, retry: (count, error) => !(error instanceof DataError && error.status >= 400 && error.status < 500) && count < 1 },
     mutations: { retry: false },
@@ -32,14 +36,14 @@ export function DataProvider({ children, dataSource, initialSession, queryClient
     epoch.current += 1
     identities.clear()
     const revision = epoch.current
-    writeStorage(SESSION_STORAGE_KEY, session)
+    if (persistSession) writeStorage(SESSION_STORAGE_KEY, session)
     // Cancel reads and erase the previous learner's cached data before switching adapters.
     void client.cancelQueries()
     client.clear()
     queue.current = Promise.resolve()
     setAuth({ session, revision })
-  }, [client, identities])
-  const signOut = useCallback(() => transition(null), [transition])
+  }, [client, identities, persistSession])
+  const signOut = useCallback(() => (onSignOut ? onSignOut() : transition(null)), [onSignOut, transition])
   const onUnauthorized = useCallback(() => { if (epoch.current === auth.revision) signOut() }, [auth.revision, signOut])
   // The factory stores onUnauthorized for later requests; it never invokes it during render.
   // eslint-disable-next-line react-hooks/refs

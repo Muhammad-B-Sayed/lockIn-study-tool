@@ -30,6 +30,9 @@ export const screens = [
   { name: 'tour-4', path: '/app/settings', setup: page => tourTo(page, 3) },
   { name: 'tour-5', path: '/app/settings', setup: page => tourTo(page, 4) },
   { name: 'tour-6', path: '/app/settings', setup: page => tourTo(page, 5) },
+  { name: 'example', path: '/app/settings', setup: async page => { await page.getByRole('button', { name: 'View an example' }).click(); await page.waitForTimeout(800) }, full: true },
+  { name: 'example-settings', path: '/app/settings', setup: async page => { await page.getByRole('button', { name: 'View an example' }).click(); await page.waitForTimeout(500); await page.getByRole('link', { name: 'Settings' }).first().click(); await page.waitForTimeout(600) } },
+  { name: 'example-edit', path: '/app/settings', setup: async page => { await page.getByRole('button', { name: 'View an example' }).click(); await page.waitForTimeout(600); await page.locator('.deadline-row .check').first().click(); await page.waitForTimeout(500) } },
   { name: 'new-deadline', path: '/app/courses/course-csc369', setup: async page => { await page.getByRole('button', { name: 'More options' }).click(); await page.getByRole('menuitem', { name: 'Add deadline' }).click(); await page.waitForTimeout(300) } },
 ]
 

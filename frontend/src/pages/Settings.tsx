@@ -7,6 +7,7 @@ import { errorMessage, useToast } from '../ui/toastContext'
 import { Kbd } from '../ui/primitives'
 import { DataTools } from '../features/DataTools'
 import { startTour } from '../app/tourStore'
+import { enterExample, exitExample, useExampleMode } from '../app/exampleStore'
 import './settings.css'
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
@@ -20,6 +21,7 @@ export default function Settings() {
   const [confirm, setConfirm] = useState<'delete' | 'reset' | null>(null)
   const [busy, setBusy] = useState(false)
   const demo = auth.state.status === 'signed-in' && auth.state.mode === 'demo'
+  const example = useExampleMode()
   const user = auth.state.status === 'signed-in' ? auth.state.user : null
 
   const exportData = async () => {
@@ -41,7 +43,7 @@ export default function Settings() {
       <header className="page-head">
         <div>
           <h1 className="page-head__title t-display">Settings</h1>
-          <p className="page-head__sub">{demo ? 'Appearance, your demo data, study goals and shortcuts.' : 'Appearance, your account, your data and study goals.'}</p>
+          <p className="page-head__sub">{example ? 'This example is view-only. Your own settings and data are unchanged.' : demo ? 'Appearance, your demo data, study goals and shortcuts.' : 'Appearance, your account, your data and study goals.'}</p>
         </div>
       </header>
 
@@ -59,6 +61,20 @@ export default function Settings() {
           />
         </Row>
 
+        {example ? (
+          <Row title="Example workspace" body="You are looking at sample courses in view-only mode. Nothing you do here is saved.">
+            <Button
+              variant="primary"
+              icon="arrowLeft"
+              onClick={() => {
+                navigate('/app/settings')
+                exitExample()
+              }}
+            >
+              Back to my workspace
+            </Button>
+          </Row>
+        ) : (
         <Row title="Account" body={demo ? 'You are in the demo. Everything lives in this browser only.' : `Signed in as ${user?.username ?? ''}.`}>
           <Button
             variant="secondary"
@@ -71,18 +87,24 @@ export default function Settings() {
             {demo ? 'Leave demo' : 'Sign out'}
           </Button>
         </Row>
+        )}
 
         {!demo ? <PasswordRow onChange={async (current, next) => { await account.changePassword(current, next) }} /> : null}
 
-        <Row title="Export" body="Download every course, topic, deadline, review and session as JSON.">
-          <Button variant="secondary" icon="download" onClick={exportData}>
-            Export data
-          </Button>
-        </Row>
+        {/* The example is view-only, so its data rows and per-device preferences stay hidden. */}
+        {example ? null : (
+          <>
+            <Row title="Export" body="Download every course, topic, deadline, review and session as JSON.">
+              <Button variant="secondary" icon="download" onClick={exportData}>
+                Export data
+              </Button>
+            </Row>
 
-        <DataTools />
+            <DataTools />
+          </>
+        )}
 
-        <HelpRow demo={demo} />
+        <HelpRow demo={demo} example={example} />
 
         <Row title="Keyboard" body="Work without the mouse." className="kbd-hint">
           <dl className="keys">
@@ -125,6 +147,7 @@ export default function Settings() {
           </dl>
         </Row>
 
+        {example ? null : (
         <div className="settings__danger">
           {demo ? (
             <Row title="Reset demo" body="Start over with fresh sample courses. Your demo changes are lost.">
@@ -140,6 +163,7 @@ export default function Settings() {
             </Row>
           )}
         </div>
+        )}
       </div>
 
       <Dialog
@@ -190,7 +214,8 @@ export default function Settings() {
   )
 }
 
-function HelpRow({ demo }: { demo: boolean }) {
+function HelpRow({ demo, example }: { demo: boolean; example: boolean }) {
+  const navigate = useNavigate()
   const faq: { q: string; a: string }[] = [
     {
       q: 'What should I do first?',
@@ -221,9 +246,25 @@ function HelpRow({ demo }: { demo: boolean }) {
         <h2 id="help-h" className="srow__title">
           Help
         </h2>
-        <p className="srow__body">New here, or want a refresher? The tour shows the main features in about a minute.</p>
+        <p className="srow__body">
+          {example
+            ? 'New here, or want a refresher? The tour shows the main features in about a minute.'
+            : 'The tour shows the main features in about a minute. The example opens a filled-in, view-only workspace so you can see how a term looks once it is set up.'}
+        </p>
       </div>
-      <div className="srow__control">
+      <div className="srow__control help-actions">
+        {!example ? (
+          <Button
+            variant="secondary"
+            icon="external"
+            onClick={() => {
+              enterExample()
+              navigate('/app')
+            }}
+          >
+            View an example
+          </Button>
+        ) : null}
         <Button variant="secondary" icon="sparkle" onClick={startTour}>
           Take the tour
         </Button>
