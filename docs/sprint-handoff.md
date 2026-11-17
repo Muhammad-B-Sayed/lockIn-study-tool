@@ -38,20 +38,30 @@ Features delegate
 
 - Thread id: `thread:delegated-task:command%3Amcp%3A16556f68-fcc0-4fec-b617-521d93106cb9%3Adelegate-task%3A32be2a45-a4df-45a0-82e8-36d330b549c6`
 - Owns `src/lib/`, `src/app/`, and new components under `src/features/` with their own CSS files.
-- Still on its first full run as of 2:19 AM. No report yet.
+- Round 1 finished at 2:19 AM with 15 features. Round 2 started at 2:20 AM.
 
 Both were told: build until 2:36 AM, start nothing new after that, send the final report by 2:42 AM. Read a delegate's report with `t3_thread_read` on its thread id. Continue one with `t3_thread_send` to the same thread, which keeps its context. Do not poll a running delegate. Its completion wakes the lead.
 
 ## What has shipped so far
 
-Features, mounted in pages as of the 2:08 AM check. The features delegate's report will have the final list.
+Features, round 1, finished at 2:19 AM. All 15 are mounted and committed. The full report is in the delegate's thread.
 
-- Today: a weekly study panel with a per-device daily goal (`src/features/WeekPanel.tsx`, `src/lib/domain/stats.ts`, `src/app/prefs.ts`).
-- Topic: logged sessions and manual time entry (`LogTimeButton`, `TopicSessions` in `WeekPanel.tsx`).
-- Course: an exam readiness card and a grades panel (`src/features/ExamReadiness.tsx`, `GradesPanel.tsx`, `src/lib/domain/grades.ts`).
-- Settings: data tools for JSON import and calendar `.ics` export (`src/features/DataTools.tsx`, `src/lib/data/backup.ts`, `src/lib/domain/ics.ts`).
-- Focus: break controls (`src/features/FocusCompanion.tsx`, `src/app/breakStore.ts`).
-- Keyboard go-to shortcuts (`src/app/useGoToKeys.ts`). Not yet confirmed as mounted.
+- Today: a "This week" panel with study time against last week, time per course, a per-device daily goal, a streak reminder, manual "Log time", and a two-week session log with remove and undo (`src/features/WeekPanel.tsx`, `src/lib/domain/stats.ts`, `src/app/prefs.ts`).
+- Topic: session notes from past check-ins, and "Log time" (`TopicSessions`, `LogTimeButton` in `WeekPanel.tsx`).
+- Course: a grades panel with weighted average and the average needed for a target (`GradesPanel.tsx`, `src/lib/domain/grades.ts`, `src/app/scores.ts`), a test countdown card (`ExamReadiness.tsx`), and "move topic dates a week" with undo in the More options menu (`useShiftDates.ts`).
+- Settings: JSON import and calendar `.ics` export (`DataTools.tsx`, `src/lib/data/backup.ts`, `src/lib/domain/ics.ts`), break length, daily goal.
+- Focus: breaks with a countdown pill that follows you across pages, a tab-title countdown and chime off the Focus page (`FocusCompanion.tsx`, `src/app/breakStore.ts`), and a custom session length from 5 to 240 minutes (`FocusLength.tsx`).
+- Undo when deleting a deadline, an event or a topic (`useDeleteTopic.ts`, `forms.tsx`, `actions.tsx`).
+- Keyboard: `g` then `t`, `r`, `c`, `o`, `f` or `s` to change page (`src/app/useGoToKeys.ts`).
+
+Features, round 2, started at 2:20 AM. Its list, in order: make an import retry add the topics a half-imported course is missing, an "Export calendar" action on the Calendar page, an 8-week study trend in the This week panel.
+
+Limits the features delegate reported:
+
+- Nothing it built was viewed in a browser. Look first at the custom length field on Focus setup and the break pill position, at 390px.
+- Import in account mode was not run against the live backend. It sends requests one at a time.
+- Import leaves out rating history, because the API cannot create past reviews. Topic undo has the same gap and cannot restore sessions older than 120 days.
+- Scores, grade targets, daily goal, break length and focus length live in localStorage, per device.
 
 The lead read `backup.ts` for data safety. The import only adds. It validates every record before writing, skips records that already exist, and never replaces or deletes.
 
@@ -70,9 +80,8 @@ UI/UX, round 1. The full list is in the delegate's thread. The main ones:
 
 ## Known state at 2:19 AM
 
-- `npx tsc -b` passes.
-- `npx eslint .` passed at 2:08 AM.
-- `npx vitest run` passed 508 of 508 at 2:16 AM, per the UI/UX delegate.
+- At 2:20 AM, run by the lead on commit `d791bd4`: `npx tsc -b` passes, `npx eslint .` passes, `npx vitest run` passes 510 of 510.
+- No production build (`npm run build`) has been run yet.
 - The lead changed one test, `src/__tests__/navigation.integration.test.tsx`, because the deadline title now appears in three places on a course page.
 - The UI/UX delegate added three screenshot states to `frontend/scripts/screens.mjs`: `delete-topic`, `edit-deadline`, `reset-demo`.
 - Checked by code reading only, not in a browser: the Focus discard step, the event dialog changes, the loading placeholders, the tab titles, the dialog drag fix, the password error rows.
@@ -109,4 +118,10 @@ From the UI/UX delegate's round 1 report, minus what round 2 was given:
 1. "Leave demo" and "Sign out" in the account menu act with no confirmation.
 2. Deadlines on Today cannot be edited from there.
 
-The features delegate's own list of ideas it did not reach will be in its final report. Ideas from the original brief that were not confirmed as built: undo for deletes beyond materials, bulk actions on topics, better search in the command palette, an end-of-session sound or tab-title countdown in Focus.
+From the features delegate's round 1 report, minus what round 2 was given:
+
+1. Multi-select on the course topic list, to rate, date or delete several at once.
+2. Store grade scores in the account so they follow the user across devices. Needs a backend field and a migration.
+3. Command palette search across notes and deadlines.
+4. Pomodoro cycles, with breaks that start on their own.
+5. Rating history in imports. Needs a new backend endpoint.
