@@ -1,21 +1,12 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { useAssessmentMutations, useCourseMutations, useEventMutations, useSessionMutations, useTopicMutations, useWorkspace } from '../lib/data'
 import { chunk, MAX_IMPORT_BYTES, planImport, planIsEmpty, type ImportPlan } from '../lib/data/backup'
-import { buildIcs } from '../lib/domain/ics'
 import { formatMinutes } from '../lib/domain/stats'
 import { DAILY_GOAL_CHOICES, setPrefs, usePrefs } from '../app/prefs'
 import { Button, Dialog, Select } from '../ui/primitives'
 import { errorMessage, useToast } from '../ui/toastContext'
+import { useExportCalendar } from './useExportCalendar'
 import './datatools.css'
-
-function download(name: string, text: string, type: string) {
-  const url = URL.createObjectURL(new Blob([text], { type }))
-  const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  a.click()
-  URL.revokeObjectURL(url)
-}
 
 const count = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`
 
@@ -35,24 +26,7 @@ export function DataTools() {
   const eventM = useEventMutations()
   const sessionM = useSessionMutations()
 
-  const exportCalendar = () => {
-    if (!ws) return
-    const ics = buildIcs(ws, new Date())
-    if (!ics.deadlines && !ics.studyBlocks && !ics.events) {
-      toast.show({ message: 'Nothing to export yet. Add a deadline or plan a topic first.' })
-      return
-    }
-    download(`lockin-calendar-${new Date().toISOString().slice(0, 10)}.ics`, ics.text, 'text/calendar')
-    toast.show({
-      message: `Calendar file saved: ${[
-        ics.deadlines ? count(ics.deadlines, 'deadline') : null,
-        ics.studyBlocks ? count(ics.studyBlocks, 'planned topic') : null,
-        ics.events ? count(ics.events, 'event') : null,
-      ]
-        .filter(Boolean)
-        .join(', ')}`,
-    })
-  }
+  const exportCalendar = useExportCalendar()
 
   const chooseFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
