@@ -1,7 +1,7 @@
 .settings {
   max-width: var(--content-max);
 }
-.settings > * {
+.settings > :not(dialog) {
   max-width: 780px;
 }
 .settings__list {

@@ -336,7 +336,7 @@ function AssessmentDialogBody({
           </Field>
           <Field label="Weight" htmlFor={`${id}-w`} optional error={errors.weight}>
             <span className="suffix-field">
-              <Input id={`${id}-w`} inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} className="t-mono" aria-label="Weight, percent of final grade" placeholder="0" />
+              <Input id={`${id}-w`} inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} className="t-mono" aria-label="Weight, percent of final grade" />
               <span className="suffix-field__suffix" aria-hidden>
                 %
               </span>

@@ -68,7 +68,8 @@ describe('navigation and preferences', () => {
     await waitFor(() => expect(persisted().assessments.find((item) => item.title === 'midterm')).toMatchObject({ kind: 'exam', courseId: course.id, dueDate: '2026-11-12' }))
     const sidebarCourse = screen.getByRole('link', { name: /CSC369.*Operating Systems/ })
     await user.click(sidebarCourse)
-    expect(await main().findByText('midterm', { exact: true })).toBeInTheDocument()
+    // The deadline list, the exam readiness card and the grades panel all name it.
+    expect((await main().findAllByText('midterm', { exact: true })).length).toBeGreaterThan(0)
     expect(location()).toBe(`/app/courses/${course.id}`)
   })
 

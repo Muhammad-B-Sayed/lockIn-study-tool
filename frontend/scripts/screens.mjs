@@ -20,6 +20,9 @@ export const screens = [
   { name: 'review-hover', path: '/app/review', setup: async page => { await page.locator('.review-row').nth(1).hover(); await page.waitForTimeout(250) } },
   { name: 'rate-menu', path: '/app/review', setup: async page => { await page.locator('.review-row').first().locator('.rate-chip').click(); await page.waitForTimeout(250) } },
   { name: 'rated-toast', path: '/app/review', setup: async page => { await page.locator('.review-row').first().locator('.rate-chip').click(); await page.getByRole('menuitem', { name: /Solid/ }).click(); await page.waitForTimeout(400) } },
+  { name: 'delete-topic', path: '/app', setup: async page => { await openFirstLink(page, '/app/topics/'); await page.getByRole('button', { name: 'More options' }).click(); await page.getByRole('menuitem', { name: 'Delete topic' }).click(); await page.waitForTimeout(300) } },
+  { name: 'edit-deadline', path: '/app/courses/course-csc369', setup: async page => { await page.locator('.deadline-row__title--btn').first().click(); await page.getByRole('button', { name: 'Delete', exact: true }).click(); await page.waitForTimeout(300) } },
+  { name: 'reset-demo', path: '/app/settings', setup: async page => { await page.getByRole('button', { name: 'Reset demo' }).click(); await page.waitForTimeout(300) } },
   { name: 'new-deadline', path: '/app/courses/course-csc369', setup: async page => { await page.getByRole('button', { name: 'More options' }).click(); await page.getByRole('menuitem', { name: 'Add deadline' }).click(); await page.waitForTimeout(300) } },
 ]
 

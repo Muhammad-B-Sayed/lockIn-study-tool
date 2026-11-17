@@ -1,9 +1,12 @@
 import {
+  cloneElement,
   forwardRef,
+  isValidElement,
   useEffect,
   useRef,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
+  type ReactElement,
   type ReactNode,
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
@@ -82,6 +85,17 @@ type FieldShellProps = {
 }
 
 export function Field({ label, hint, error, children, htmlFor, optional }: FieldShellProps) {
+  // Tie the message to the control, so a screen reader reads the error or hint with the field.
+  const describedBy = error ? `${htmlFor}-error` : hint ? `${htmlFor}-hint` : undefined
+  if (isValidElement(children) && (children.props as { id?: string }).id === htmlFor && typeof children.type !== 'string') {
+    const el = children as ReactElement<Record<string, unknown>>
+    if (el.type === Input || el.type === Textarea || el.type === Select) {
+      children = cloneElement(el, {
+        'aria-invalid': error ? true : (el.props['aria-invalid'] as boolean | undefined),
+        'aria-describedby': (el.props['aria-describedby'] as string | undefined) ?? describedBy,
+      })
+    }
+  }
   return (
     <div className={['field', error ? 'field--error' : ''].join(' ')}>
       <label className="field__label" htmlFor={htmlFor}>

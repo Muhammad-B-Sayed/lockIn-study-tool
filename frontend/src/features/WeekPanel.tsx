@@ -1,6 +1,7 @@
 import { useId, useMemo, useState, type FormEvent } from 'react'
 import { useSessionMutations } from '../lib/data'
-import { addDays, today } from '../lib/domain'
+import { addDays, currentStreak, today } from '../lib/domain'
+import { Icon } from '../ui/Icon'
 import { formatMinutes, weekStats } from '../lib/domain/stats'
 import type { StudySession } from '../lib/data/types'
 import { formatDate, localDate } from '../app/format'
@@ -82,6 +83,7 @@ export function WeekPanel({ s, now }: { s: StudyIndex; now: Date }) {
   const day = today(now)
   const goal = prefs.dailyGoalMinutes
   const goalPct = goal ? Math.min(100, Math.round((stats.todayMinutes / goal) * 100)) : 0
+  const streak = useMemo(() => currentStreak(s.ws.sessions, now), [s.ws.sessions, now])
   const delta = stats.minutes - stats.previousToDate
   const maxCourse = Math.max(1, ...stats.byCourse.map((c) => Math.max(c.minutes, c.previous)))
 
@@ -178,6 +180,11 @@ export function WeekPanel({ s, now }: { s: StudyIndex; now: Date }) {
           >
             <span className="week__fill" style={{ ['--w' as string]: `${goalPct}%` }} />
           </div>
+        ) : null}
+        {streak >= 2 && stats.todayMinutes === 0 ? (
+          <p className="week__streak">
+            <Icon name="flame" size={14} /> You have studied {streak} days in a row. Any session today keeps it going.
+          </p>
         ) : null}
       </div>
 

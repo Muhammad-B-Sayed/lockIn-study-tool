@@ -213,7 +213,7 @@ function AuthCard() {
             {error}
           </p>
         ) : null}
-        <Button type="submit" variant={username && password ? 'primary' : 'secondary'} size="lg" loading={busy} className="auth__submit">
+        <Button type="submit" variant="primary" size="lg" loading={busy} className="auth__submit">
           {mode === 'signin' ? 'Sign in' : 'Create account'}
         </Button>
         {mode === 'signin' ? (

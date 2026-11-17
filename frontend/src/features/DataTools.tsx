@@ -111,7 +111,15 @@ export function DataTools() {
             resources: t.resources.map((r) => ({ label: r.label, url: r.url })),
           })),
         )
-        batch.forEach((t, i) => topicIds.set(t.id, created[i].id))
+        // Match by position in the reply, and fall back to title if the server reordered it.
+        const unclaimed = new Set(created.map((row) => row.id))
+        batch.forEach((t, i) => {
+          const same = (row: (typeof created)[number] | undefined) => !!row && unclaimed.has(row.id) && row.title === t.title.trim() && row.position === t.position
+          const match = same(created[i]) ? created[i] : created.find(same)
+          if (!match) return
+          unclaimed.delete(match.id)
+          topicIds.set(t.id, match.id)
+        })
         step(batch.length)
       }
       // Creating a topic cannot set its last review date, so restore it afterwards.

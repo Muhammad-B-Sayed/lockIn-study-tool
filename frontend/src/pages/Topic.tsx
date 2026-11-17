@@ -7,6 +7,7 @@ import type { Topic as TopicT, TopicPatch } from '../lib/data/types'
 import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { startFocus, useRateWithUndo } from '../features/actions'
 import { LogTimeButton, TopicSessions } from '../features/WeekPanel'
+import { useDeleteTopic } from '../features/useDeleteTopic'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { CONFIDENCE } from '../ui/confidenceMeta'
 import { Icon } from '../ui/Icon'
@@ -58,7 +59,7 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
   const navigate = useNavigate()
   const toast = useToast()
   const rate = useRateWithUndo()
-  const { remove } = useTopicMutations()
+  const deleteTopic = useDeleteTopic()
   const { save, state } = useSaver(t)
   const course = s.courseById.get(t.courseId)
   const day = today(now)
@@ -285,7 +286,7 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
         onClose={() => setConfirmDelete(false)}
         size="sm"
         title="Delete this topic?"
-        description={`“${t.title}” goes away with its notes, materials and rating history. This cannot be undone. Marking it “Not on the exam” hides it from review and keeps everything.`}
+        description={`“${t.title}” goes away with its notes, materials and rating history. You can undo for a few seconds, but the rating history does not come back. Marking it “Not on the exam” hides it from review and keeps everything.`}
         footer={
           <>
             <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
@@ -298,8 +299,7 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
               onClick={async () => {
                 setDeleting(true)
                 try {
-                  await remove(t.id)
-                  toast.show({ message: `Deleted ${t.title}` })
+                  await deleteTopic(t, s.ws)
                   navigate(`/app/courses/${t.courseId}`)
                 } catch (err) {
                   setDeleting(false)

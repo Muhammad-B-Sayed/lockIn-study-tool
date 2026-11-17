@@ -59,7 +59,7 @@ export function ExamReadiness({ course, topics, assessments, now }: { course: Co
                     {r.a.weight != null ? ` · ${r.a.weight}% of grade` : ''}
                   </span>
                 </p>
-                <CoverageStrip topics={r.topics} size="sm" label={`Confidence across the ${r.topics.length} topics on ${r.a.title}`} />
+                <CoverageStrip topics={r.topics} size="sm" />
                 <p className="ready__line">
                   <strong className="tabular">
                     {r.solid} of {r.topics.length}

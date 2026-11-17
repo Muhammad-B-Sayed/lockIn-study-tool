@@ -59,3 +59,26 @@
     bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 0.75rem);
   }
 }
+
+/* Custom focus length field on the Focus setup screen. */
+.focus-len {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: -0.5rem;
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+.focus-len .focus-len__input {
+  width: 4.5rem;
+  height: 36px;
+  text-align: center;
+}
+.focus-len[data-on] .focus-len__input {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.focus-len__input[aria-invalid='true'] {
+  border-color: var(--danger);
+}

@@ -8,6 +8,8 @@ import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { AssessmentDialog, CourseDialog, SyllabusDialog } from '../features/forms'
 import { DeadlineRow, ReviewRow } from '../features/rows'
 import { GradesPanel } from '../features/GradesPanel'
+import { ExamReadiness } from '../features/ExamReadiness'
+import { useShiftDates } from '../features/useShiftDates'
 import { startFocus, useRateWithUndo, useToggleDone } from '../features/actions'
 import { Icon } from '../ui/Icon'
 import { Menu } from '../ui/Menu'
@@ -43,6 +45,7 @@ function CourseView({ c, s, now }: { c: CourseT; s: StudyIndex; now: Date }) {
   const topicsM = useTopicMutations()
   const rate = useRateWithUndo()
   const toggle = useToggleDone()
+  const shiftDates = useShiftDates()
   const [editing, setEditing] = useState(false)
   const [importing, setImporting] = useState(false)
   const [deadline, setDeadline] = useState<Assessment | 'new' | null>(null)
@@ -143,6 +146,8 @@ function CourseView({ c, s, now }: { c: CourseT; s: StudyIndex; now: Date }) {
             items={[
               { label: 'Edit details', icon: 'edit', onSelect: () => setEditing(true) },
               { label: 'Add deadline', icon: 'flag', onSelect: () => setDeadline('new') },
+              { label: 'Move upcoming topic dates a week later', icon: 'calendar', onSelect: () => void shiftDates(topics, 7, day) },
+              { label: 'Move upcoming topic dates a week earlier', icon: 'calendar', onSelect: () => void shiftDates(topics, -7, day) },
               c.status === 'active'
                 ? { label: 'Move to past courses', icon: 'archive', onSelect: () => setStatus('archived') }
                 : { label: 'Move back to this term', icon: 'archive', onSelect: () => setStatus('active') },
@@ -185,6 +190,8 @@ function CourseView({ c, s, now }: { c: CourseT; s: StudyIndex; now: Date }) {
         </nav>
       ) : null}
 
+      <ExamReadiness course={c} topics={topics} assessments={deadlines} now={now} />
+
       <div className="course__grid">
         <section className="panel course__topics" id="topics" aria-labelledby="topics-h">
           <header className="panel__head">
@@ -218,7 +225,7 @@ function CourseView({ c, s, now }: { c: CourseT; s: StudyIndex; now: Date }) {
             <Input
               value={newTopic}
               onChange={(e) => setNewTopic(e.target.value)}
-              placeholder="New topic, e.g. Page tables"
+              placeholder="New topic, e.g. Paging"
               aria-label="New topic title"
               maxLength={160}
             />

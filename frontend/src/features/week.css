@@ -57,6 +57,19 @@
   background: var(--ok);
 }
 
+.week__streak {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+.week__streak svg {
+  flex: none;
+  color: var(--accent-text);
+}
+
 .week__courses {
   display: grid;
   gap: 0.6rem;

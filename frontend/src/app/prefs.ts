@@ -6,10 +6,12 @@ export type Prefs = {
   dailyGoalMinutes: number | null
   /** Minutes offered for a break after a focus session. */
   breakMinutes: number
+  /** Length of the last focus session started from the Focus page. New sessions start at this length. */
+  focusMinutes: number
 }
 
 const KEY = 'lockin.prefs.v1'
-const DEFAULTS: Prefs = { dailyGoalMinutes: null, breakMinutes: 5 }
+const DEFAULTS: Prefs = { dailyGoalMinutes: null, breakMinutes: 5, focusMinutes: 50 }
 const listeners = new Set<() => void>()
 let cache: { raw: string | null; prefs: Prefs } = { raw: null, prefs: DEFAULTS }
 let memory: string | null = null
@@ -29,9 +31,11 @@ function parse(raw: string | null): Prefs {
     if (!value || typeof value !== 'object') return DEFAULTS
     const goal = value.dailyGoalMinutes
     const rest = value.breakMinutes
+    const length = value.focusMinutes
     return {
       dailyGoalMinutes: typeof goal === 'number' && Number.isFinite(goal) && goal >= 5 && goal <= 1440 ? Math.round(goal) : null,
       breakMinutes: typeof rest === 'number' && Number.isFinite(rest) && rest >= 1 && rest <= 60 ? Math.round(rest) : DEFAULTS.breakMinutes,
+      focusMinutes: typeof length === 'number' && Number.isFinite(length) && length >= 5 && length <= 240 ? Math.round(length) : DEFAULTS.focusMinutes,
     }
   } catch {
     return DEFAULTS
@@ -43,6 +47,11 @@ function read(): Prefs {
   if (raw === cache.raw) return cache.prefs
   cache = { raw, prefs: parse(raw) }
   return cache.prefs
+}
+
+/** The current preferences, for code that runs outside a component. */
+export function getPrefs(): Prefs {
+  return read()
 }
 
 export function setPrefs(patch: Partial<Prefs>) {

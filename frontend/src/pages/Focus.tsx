@@ -7,7 +7,8 @@ import { elapsedMs, focus, formatClock, useFocusRun, useTick, type FocusRun } fr
 import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { useRateWithUndo } from '../features/actions'
 import { offerBreak } from '../app/breakStore'
-import { usePrefs } from '../app/prefs'
+import { getPrefs, setPrefs, usePrefs } from '../app/prefs'
+import { FocusLength } from '../features/FocusLength'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { CONFIDENCE, RATABLE } from '../ui/confidenceMeta'
 import { Button, Kbd, Select } from '../ui/primitives'
@@ -44,11 +45,14 @@ function Setup({ s }: { s: StudyIndex }) {
   const navigate = useNavigate()
   const ranked = useMemo(() => rankReview(s.ws, now).slice(0, 3), [s.ws, now])
   const [topicId, setTopicId] = useState<string>(ranked[0]?.topic.id ?? '')
-  const [goal, setGoal] = useState(50)
+  const [goal, setGoal] = useState(() => getPrefs().focusMinutes)
   const topic = topicId ? s.topicById.get(topicId) : undefined
   const course = topic ? s.courseById.get(topic.courseId) : undefined
 
-  const begin = () => focus.start({ topicId: topic?.id ?? null, courseId: topic?.courseId ?? null, goalMinutes: goal })
+  const begin = () => {
+    setPrefs({ focusMinutes: goal })
+    focus.start({ topicId: topic?.id ?? null, courseId: topic?.courseId ?? null, goalMinutes: goal })
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -120,6 +124,7 @@ function Setup({ s }: { s: StudyIndex }) {
             </button>
           ))}
         </div>
+        <FocusLength value={goal} presets={GOALS} onChange={setGoal} />
 
         <Button variant="primary" size="lg" icon="timer" className="setup__go" onClick={begin}>
           Lock in{topic ? ` on ${topic.title.length > 28 ? 'this' : topic.title}` : ''}

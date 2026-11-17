@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAssessmentMutations, useRateTopic } from '../lib/data'
 import type { Assessment, Confidence, Topic } from '../lib/data/types'
 import { focus } from '../app/focusStore'
+import { getPrefs } from '../app/prefs'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { CONFIDENCE } from '../ui/confidenceMeta'
 import { useToast } from '../ui/toastContext'
@@ -53,7 +54,7 @@ export function useToggleDone() {
   }
 }
 
-export function startFocus(navigate: ReturnType<typeof useNavigate>, topic: Topic | null, minutes = 50) {
+export function startFocus(navigate: ReturnType<typeof useNavigate>, topic: Topic | null, minutes = getPrefs().focusMinutes) {
   focus.start({ topicId: topic?.id ?? null, courseId: topic?.courseId ?? null, goalMinutes: minutes })
   navigate('/app/focus')
 }
