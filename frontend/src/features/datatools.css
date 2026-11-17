@@ -1,0 +1,23 @@
+/* Settings rows added by DataTools: daily goal, calendar file, import. */
+.dtools__select {
+  min-width: 11rem;
+}
+.dtools__error {
+  margin-top: 0.5rem;
+  font-size: var(--text-sm);
+  color: var(--danger);
+  max-width: 50ch;
+}
+.dtools__plan {
+  display: grid;
+  gap: 0.6rem;
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+.dtools__list {
+  display: grid;
+  gap: 0.25rem;
+  padding-left: 1.1rem;
+  list-style: disc;
+  color: var(--text);
+}

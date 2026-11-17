@@ -6,11 +6,13 @@ import { formatDate, localDate } from '../app/format'
 import type { Topic as TopicT, TopicPatch } from '../lib/data/types'
 import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { startFocus, useRateWithUndo } from '../features/actions'
+import { LogTimeButton, TopicSessions } from '../features/WeekPanel'
+import { useDeleteTopic } from '../features/useDeleteTopic'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { CONFIDENCE } from '../ui/confidenceMeta'
 import { Icon } from '../ui/Icon'
 import { Menu } from '../ui/Menu'
-import { Button, EmptyState, IconButton, Input } from '../ui/primitives'
+import { Button, Dialog, EmptyState, IconButton, Input } from '../ui/primitives'
 import { PickerField } from '../ui/PickerField'
 import { CourseTag, DueTag, KindTag, RateControl } from '../ui/study'
 import { useToast } from '../ui/toastContext'
@@ -57,7 +59,7 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
   const navigate = useNavigate()
   const toast = useToast()
   const rate = useRateWithUndo()
-  const { remove } = useTopicMutations()
+  const deleteTopic = useDeleteTopic()
   const { save, state } = useSaver(t)
   const course = s.courseById.get(t.courseId)
   const day = today(now)
@@ -65,6 +67,8 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
   const [title, setTitle] = useState(t.title)
   const [details, setDetails] = useState(t.details ?? '')
   const [notes, setNotes] = useState(t.notes)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const notesTimer = useRef<number | undefined>(undefined)
 
   // Notes autosave: 900 ms after typing stops, and on leave.
@@ -172,15 +176,7 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
                 label: 'Delete topic',
                 icon: 'trash',
                 tone: 'danger',
-                onSelect: async () => {
-                  try {
-                    await remove(t.id)
-                    toast.show({ message: `Deleted ${t.title}` })
-                    navigate(`/app/courses/${t.courseId}`)
-                  } catch (err) {
-                    toast.error(err)
-                  }
-                },
+                onSelect: () => setConfirmDelete(true),
               },
             ]}
           />
@@ -253,7 +249,10 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
             <dl className="facts__list">
               <div>
                 <dt>Focused time</dt>
-                <dd className="t-mono">{minutes ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : 'None yet'}</dd>
+                <dd className="t-mono">
+                  {minutes ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : 'None yet'}
+                  <LogTimeButton s={s} topicId={t.id} />
+                </dd>
               </div>
               <div>
                 <dt>Reviews</dt>
@@ -277,9 +276,44 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
                 </ul>
               </>
             ) : null}
+            <TopicSessions s={s} topicId={t.id} day={today(now)} />
           </section>
         </aside>
       </div>
+
+      <Dialog
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        size="sm"
+        title="Delete this topic?"
+        description={`“${t.title}” goes away with its notes, materials and rating history. You can undo for a few seconds, but the rating history does not come back. Marking it “Not on the exam” hides it from review and keeps everything.`}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
+              Keep it
+            </Button>
+            <Button
+              variant="danger"
+              icon="trash"
+              loading={deleting}
+              onClick={async () => {
+                setDeleting(true)
+                try {
+                  await deleteTopic(t, s.ws)
+                  navigate(`/app/courses/${t.courseId}`)
+                } catch (err) {
+                  setDeleting(false)
+                  toast.error(err)
+                }
+              }}
+            >
+              Delete topic
+            </Button>
+          </>
+        }
+      >
+        <span className="sr-only">Confirm delete</span>
+      </Dialog>
     </div>
   )
 }
@@ -398,8 +432,13 @@ function Resources({ t }: { t: TopicT }) {
     }
   }
   const removeAt = async (i: number) => {
+    const removed = list[i]
     try {
       await update(t.id, { resources: list.filter((_, n) => n !== i) })
+      toast.show({
+        message: `Removed ${removed.label}`,
+        action: { label: 'Undo', run: () => update(t.id, { resources: list }).then(() => undefined) },
+      })
     } catch (err) {
       toast.error(err)
     }

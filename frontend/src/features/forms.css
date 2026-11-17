@@ -6,6 +6,8 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.85rem;
+  /* an error under one field must not stretch or shift its neighbours */
+  align-items: start;
 }
 .form-row--code {
   grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr);
@@ -41,6 +43,21 @@
 }
 .swatch:hover {
   transform: scale(1.08);
+}
+/* the swatch keeps its size; the area that takes a tap grows to about 44px */
+.swatch {
+  position: relative;
+}
+.swatch::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+@media (pointer: coarse) {
+  .swatch {
+    width: 36px;
+    height: 36px;
+  }
 }
 .swatch[aria-checked='true'] {
   box-shadow:
@@ -373,4 +390,18 @@
 }
 .import-kind[data-guess] .input {
   border-color: var(--accent);
+}
+
+/* ---------- two-step delete in a dialog footer ---------- */
+.confirm-delete {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.confirm-delete__q {
+  margin-right: 0.2rem;
+  font-size: var(--text-sm);
+  font-weight: 520;
+  color: var(--danger);
 }

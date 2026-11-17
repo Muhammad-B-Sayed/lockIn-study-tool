@@ -19,6 +19,25 @@
   }
 }
 
+/* Pages that render nothing while the workspace loads show a heading and a panel placeholder, not a blank screen. */
+.page[aria-busy='true']:empty::before,
+.page[aria-busy='true']:empty::after {
+  content: '';
+  display: block;
+  background: var(--surface-3);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+.page[aria-busy='true']:empty::before {
+  width: min(55%, 26rem);
+  height: 2.75rem;
+  margin: 1.6rem 0 2.25rem;
+  border-radius: 8px;
+}
+.page[aria-busy='true']:empty::after {
+  height: 22rem;
+  border-radius: var(--r-lg);
+}
+
 .page-head {
   display: flex;
   align-items: flex-end;
@@ -285,6 +304,15 @@
     border-color var(--dur-1),
     color var(--dur-1),
     transform var(--dur-1) var(--ease-spring);
+}
+/* The box stays 20px; the area that takes a tap or click is 44px. */
+.check {
+  position: relative;
+}
+.check::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
 }
 .check:hover {
   border-color: var(--accent);
@@ -642,9 +670,27 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+/* no hover on touch: a dotted underline says the title opens the editor */
+@media (hover: none) {
+  .deadline-row__title--btn {
+    text-decoration: underline dotted var(--text-3);
+    text-underline-offset: 4px;
+  }
+}
 
 @media (hover: hover) and (pointer: fine) and (min-width: 641px) {
   .review-row__focus .btn__label {
     max-width: none !important;
+  }
+}
+
+/* Full review rows: one chip width, so the rating column reads as a column instead of a ragged edge. */
+@media (min-width: 641px) {
+  .review-row:not(.review-row--compact) .review-row__actions .rate-chip {
+    width: 148px;
+    justify-content: flex-start;
+  }
+  .review-row:not(.review-row--compact) .review-row__actions .rate-chip__chev {
+    margin-left: auto;
   }
 }

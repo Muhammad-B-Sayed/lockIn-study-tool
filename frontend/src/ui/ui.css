@@ -21,6 +21,11 @@
     box-shadow var(--dur-2) var(--ease-out);
   user-select: none;
 }
+/* an icon never gives up its width when the label is tight on space */
+.btn > svg,
+.btn > .spinner {
+  flex: none;
+}
 .btn:active:not(:disabled) {
   transform: translateY(1px) scale(0.985);
 }
@@ -120,6 +125,17 @@
 .icon-btn[aria-expanded='true'] {
   background: var(--surface-3);
   color: var(--text);
+}
+/* a disabled icon button looks disabled and does not light up on hover */
+.icon-btn:disabled,
+.icon-btn:disabled:hover {
+  opacity: 0.38;
+  background: transparent;
+  color: var(--text-2);
+}
+.icon-btn--secondary:disabled,
+.icon-btn--secondary:disabled:hover {
+  background: var(--surface-2);
 }
 
 .kbd {
@@ -459,6 +475,27 @@
 .dialog__foot .spacer {
   flex: 1;
 }
+/* asks before Escape or a backdrop click throws away typed input */
+.dialog__guard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem 0.6rem 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+  background: var(--danger-soft);
+}
+.dialog__guard-q {
+  flex: 1;
+  min-width: 10rem;
+  font-size: var(--text-sm);
+  font-weight: 520;
+  color: var(--text);
+}
+/* A confirmation has no body of its own: do not leave an empty block above the buttons. */
+.dialog__body:has(> .sr-only:only-child) {
+  padding-block: 0.6rem;
+}
 @keyframes dialog-in {
   from {
     opacity: 0;
@@ -482,6 +519,15 @@
     border-radius: var(--r-xl) var(--r-xl) 0 0;
     max-height: 92dvh;
     padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* 44px touch targets on phones */
+  .dialog__head .icon-btn {
+    width: 44px;
+    height: 44px;
+    margin: -6px -6px 0 0;
+  }
+  .dialog__foot .btn:not(.btn--sm) {
+    --btn-h: 44px;
   }
   .dialog[open] .dialog__panel {
     animation: sheet-in var(--dur-3) var(--ease-out);
@@ -510,7 +556,8 @@
     left: 50%;
     right: auto;
     translate: -50% 0;
-    bottom: calc(var(--tabbar-h) + 1rem + env(safe-area-inset-bottom));
+    /* clear the raised Focus button, which stands 20px above the tab bar */
+    bottom: calc(var(--tabbar-h) + 1.9rem + env(safe-area-inset-bottom));
   }
 }
 .toast {

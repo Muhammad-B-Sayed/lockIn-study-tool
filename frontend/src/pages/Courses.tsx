@@ -38,9 +38,11 @@ export default function Courses() {
         <div>
           <p className="t-eyebrow page-head__eyebrow">Courses</p>
           <h1 className="page-head__title t-display">
-            {data.activeCourses.length ? (
+            {tab === 'archived' ? (
+              'Past courses'
+            ) : data.activeCourses.length ? (
               <>
-                <span className="tabular">{data.activeCourses.length}</span> courses this term
+                <span className="tabular">{data.activeCourses.length}</span> {data.activeCourses.length === 1 ? 'course' : 'courses'} this term
               </>
             ) : (
               'Your courses'
@@ -93,7 +95,7 @@ export default function Courses() {
         >
           {tab === 'active'
             ? 'Add the course, paste its syllabus, and LockIn turns each line into a topic or deadline.'
-            : 'Archive a course from its menu when the term ends. Its history stays here.'}
+            : 'When a term ends, open a course’s menu and choose “Move to past courses”. Its history stays here.'}
         </EmptyState>
       )}
 

@@ -21,6 +21,13 @@ Open `http://127.0.0.1:5173` and choose **Try the demo**. It starts with realist
 - Topics hold notes, links, study plans, and confidence history. Review ratings have undo.
 - The calendar has week and month views, movable topic plans, fixed deadlines, and personal events.
 - The focus timer logs study sessions. A command palette supports search and quick add.
+- Today has a This week panel: study time against the same point last week, time per course, a daily goal, and a session log. Study done away from the timer can be logged by hand, and a removed session can be restored with undo.
+- A course page counts down to its next exams and quizzes and shows how many of the covered topics feel solid. Its Grade panel works out the weighted average from the scores you type in and the average needed to reach a target. The course menu moves every upcoming topic date a week later or earlier.
+- A topic page lists its study sessions with the note left at each check-in. Deleting a topic, a deadline or an event offers undo. Undo on a topic brings back its notes, links, plan, confidence, sessions and deadline links, but not its list of past ratings.
+- After a focus session the app offers a break with its own countdown. Away from the Focus page, the tab title counts down and a chime marks the goal.
+- Settings exports the plan as an .ics calendar file and imports a JSON export. Import only adds: it validates the whole file first and skips what is already there.
+- Daily goal, break length, grade scores and grade targets are saved per device in the browser, not in the account.
+- Keyboard: `g` then `t`, `r`, `c`, `o`, `f` or `s` jumps to Today, Review, Calendar, Courses, Focus or Settings.
 - Light, dark, and system themes work across desktop and mobile layouts.
 - Account mode uses JWT authentication and PostgreSQL persistence. Settings supports password changes, account deletion, and JSON export.
 

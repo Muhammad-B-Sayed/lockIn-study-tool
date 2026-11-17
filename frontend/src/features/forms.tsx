@@ -12,17 +12,28 @@ import './forms.css'
 const COLORS: ColorKey[] = ['ember', 'amber', 'moss', 'teal', 'sky', 'iris', 'orchid', 'slate']
 const KINDS: AssessmentKind[] = ['assignment', 'exam', 'quiz', 'project', 'task']
 
-function ColorPicker({ value, onChange }: { value: ColorKey; onChange: (c: ColorKey) => void }) {
+const COLOR_NAMES: Record<ColorKey, string> = {
+  ember: 'Red',
+  amber: 'Amber',
+  moss: 'Green',
+  teal: 'Teal',
+  sky: 'Blue',
+  iris: 'Indigo',
+  orchid: 'Pink',
+  slate: 'Grey',
+}
+
+function ColorPicker({ value, onChange, id }: { value: ColorKey; onChange: (c: ColorKey) => void; id?: string }) {
   return (
-    <div className="swatches" role="radiogroup" aria-label="Color">
+    <div className="swatches" role="radiogroup" aria-label="Color" id={id} tabIndex={-1}>
       {COLORS.map((c) => (
         <button
           key={c}
           type="button"
           role="radio"
           aria-checked={value === c}
-          aria-label={c}
-          title={c}
+          aria-label={COLOR_NAMES[c]}
+          title={COLOR_NAMES[c]}
           data-hue={c}
           className="swatch"
           onClick={() => onChange(c)}
@@ -33,6 +44,47 @@ function ColorPicker({ value, onChange }: { value: ColorKey; onChange: (c: Color
 }
 
 const emptyToNull = (s: string) => (s.trim() ? s.trim() : null)
+
+/** After a failed submit, put the cursor in the first field that needs fixing. */
+function focusFirstError(formId: string) {
+  requestAnimationFrame(() => {
+    document.getElementById(formId)?.querySelector<HTMLElement>('.field--error :is(input, select, textarea, button)')?.focus()
+  })
+}
+
+/** Delete with a second step, so one stray click cannot remove something for good. */
+function ConfirmDelete({ what, onDelete }: { what: string; onDelete: () => Promise<void> }) {
+  const [armed, setArmed] = useState(false)
+  const [busy, setBusy] = useState(false)
+  if (!armed) {
+    return (
+      <Button variant="danger" icon="trash" onClick={() => setArmed(true)}>
+        Delete
+      </Button>
+    )
+  }
+  return (
+    <span className="confirm-delete" role="group" aria-label={`Delete this ${what}?`}>
+      <span className="confirm-delete__q">Delete this {what}?</span>
+      <Button variant="ghost" size="sm" autoFocus disabled={busy} onClick={() => setArmed(false)}>
+        Keep
+      </Button>
+      <Button
+        variant="danger"
+        size="sm"
+        icon="trash"
+        loading={busy}
+        onClick={async () => {
+          setBusy(true)
+          await onDelete()
+          setBusy(false)
+        }}
+      >
+        Delete
+      </Button>
+    </span>
+  )
+}
 
 // ---------- course ----------
 
@@ -75,7 +127,7 @@ function CourseDialogBody({
     if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) errs.email = 'That email looks off.'
     if (website.trim() && !/^https?:\/\//i.test(website.trim())) errs.website = 'Start the link with https://'
     setErrors(errs)
-    if (Object.keys(errs).length) return
+    if (Object.keys(errs).length) return focusFirstError(`${id}-form`)
     setBusy(true)
     const input = {
       code: code.trim().toUpperCase(),
@@ -126,7 +178,7 @@ function CourseDialogBody({
           </Field>
         </div>
         <Field label="Color" htmlFor={`${id}-color`}>
-          <ColorPicker value={color} onChange={setColor} />
+          <ColorPicker id={`${id}-color`} value={color} onChange={setColor} />
         </Field>
         <div className="form-row">
           <Field label="Instructor" htmlFor={`${id}-inst`} optional>
@@ -199,7 +251,7 @@ function AssessmentDialogBody({
     const w = weight.trim() ? Number(weight) : null
     if (w !== null && (Number.isNaN(w) || w < 0 || w > 100)) errs.weight = 'Use a number from 0 to 100.'
     setErrors(errs)
-    if (Object.keys(errs).length) return
+    if (Object.keys(errs).length) return focusFirstError(`${id}-form`)
     setBusy(true)
     const input = {
       title: title.trim(),
@@ -233,21 +285,23 @@ function AssessmentDialogBody({
       footer={
         <>
           {assessment ? (
-            <Button
-              variant="danger"
-              icon="trash"
-              onClick={async () => {
+            <ConfirmDelete
+              what="deadline"
+              onDelete={async () => {
                 try {
                   await m.remove(assessment.id)
-                  toast.show({ message: 'Deadline deleted' })
+                  const a = assessment
+                  const restore = { courseId: a.courseId, title: a.title, kind: a.kind, dueDate: a.dueDate, dueTime: a.dueTime, weight: a.weight, done: a.done, notes: a.notes, topicIds: a.topicIds }
+                  toast.show({
+                    message: `Deleted ${assessment.title}`,
+                    action: { label: 'Undo', run: async () => { await m.create(restore) } },
+                  })
                   onClose()
                 } catch (err) {
                   toast.error(err)
                 }
               }}
-            >
-              Delete
-            </Button>
+            />
           ) : null}
           <span className="spacer" />
           <Button variant="ghost" onClick={onClose}>
@@ -291,9 +345,9 @@ function AssessmentDialogBody({
           <Field label="Time" htmlFor={`${id}-time`} optional>
             <PickerField id={`${id}-time`} type="time" icon="clock" label="Due time" value={dueTime} display={dueTime ? formatTime(dueTime) : ''} placeholder="Any time" onChange={(v) => setDueTime(v)} onClear={() => setDueTime('')} />
           </Field>
-          <Field label="% of final grade" htmlFor={`${id}-w`} optional error={errors.weight}>
+          <Field label="Weight" htmlFor={`${id}-w`} optional error={errors.weight}>
             <span className="suffix-field">
-              <Input id={`${id}-w`} inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} className="t-mono" />
+              <Input id={`${id}-w`} inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} className="t-mono" aria-label="Weight, percent of final grade" />
               <span className="suffix-field__suffix" aria-hidden>
                 %
               </span>
@@ -311,7 +365,7 @@ function AssessmentDialogBody({
             </summary>
             <p className="field__hint">Linked topics climb the review queue as this date gets close.</p>
             <div className="link-topics__tools">
-              <Input value={topicQuery} onChange={(e) => setTopicQuery(e.target.value)} placeholder={`Search ${courseTopics.length} topics`} aria-label="Search topics" className="topic-filter" />
+              <Input value={topicQuery} onChange={(e) => setTopicQuery(e.target.value)} placeholder={courseTopics.length === 1 ? 'Search 1 topic' : `Search ${courseTopics.length} topics`} aria-label="Search topics" className="topic-filter" />
               <Button
                 size="sm"
                 variant="ghost"
@@ -377,18 +431,22 @@ function EventDialogBody({
   const [end, setEnd] = useState(event?.endTime ?? '')
   const [color, setColor] = useState<ColorKey>(event?.color ?? 'slate')
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState<{ title?: string; end?: string }>({})
 
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!title.trim()) return setError('Give it a name.')
-    if (start && end && end <= start) return setError('End after it starts.')
+    const errs: typeof errors = {}
+    if (!title.trim()) errs.title = 'Give it a name.'
+    if (start && end && end <= start) errs.end = 'Must be after the start.'
+    setErrors(errs)
+    if (Object.keys(errs).length) return focusFirstError(`${id}-form`)
     setBusy(true)
     const input = { title: title.trim(), date, startTime: start || null, endTime: end || null, color, done: event?.done ?? false }
     try {
       if (event) await m.update(event.id, input)
       else await m.create(input)
+      toast.show({ message: event ? 'Event saved' : `Added ${input.title}` })
       onClose()
     } catch (err) {
       toast.error(err)
@@ -407,33 +465,35 @@ function EventDialogBody({
       footer={
         <>
           {event ? (
-            <Button
-              variant="danger"
-              icon="trash"
-              onClick={async () => {
+            <ConfirmDelete
+              what="event"
+              onDelete={async () => {
                 try {
                   await m.remove(event.id)
+                  const restore = { title: event.title, date: event.date, startTime: event.startTime, endTime: event.endTime, color: event.color, done: event.done }
+                  toast.show({
+                    message: `Deleted ${event.title}`,
+                    action: { label: 'Undo', run: async () => { await m.create(restore) } },
+                  })
                   onClose()
                 } catch (err) {
                   toast.error(err)
                 }
               }}
-            >
-              Delete
-            </Button>
+            />
           ) : null}
           <span className="spacer" />
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
           <Button variant="primary" type="submit" form={`${id}-form`} loading={busy}>
-            Save
+            {event ? 'Save' : 'Add event'}
           </Button>
         </>
       }
     >
       <form id={`${id}-form`} className="form-grid" onSubmit={submit} noValidate>
-        <Field label="Title" htmlFor={`${id}-t`} error={error}>
+        <Field label="Title" htmlFor={`${id}-t`} error={errors.title}>
           <Input id={`${id}-t`} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Shift at the library" autoFocus />
         </Field>
         <div className="form-row form-row--3">
@@ -443,12 +503,12 @@ function EventDialogBody({
           <Field label="Start" htmlFor={`${id}-s`} optional>
             <PickerField id={`${id}-s`} type="time" icon="clock" label="Start" value={start} display={start ? formatTime(start) : ''} placeholder="Any time" onChange={(v) => setStart(v)} onClear={() => setStart('')} />
           </Field>
-          <Field label="End" htmlFor={`${id}-e`} optional>
+          <Field label="End" htmlFor={`${id}-e`} optional error={errors.end}>
             <PickerField id={`${id}-e`} type="time" icon="clock" label="End" value={end} display={end ? formatTime(end) : ''} placeholder="Any time" onChange={(v) => setEnd(v)} onClear={() => setEnd('')} />
           </Field>
         </div>
         <Field label="Color" htmlFor={`${id}-c`}>
-          <ColorPicker value={color} onChange={setColor} />
+          <ColorPicker id={`${id}-c`} value={color} onChange={setColor} />
         </Field>
       </form>
     </Dialog>
@@ -540,7 +600,9 @@ function SyllabusDialogBody({ open, onClose, course, startPosition }: { open: bo
           })),
         )
       }
-      toast.show({ message: `Added ${nTopics} topics and ${nDue} deadlines to ${course.code}` })
+      toast.show({
+        message: `Added ${[nTopics ? `${nTopics} ${nTopics === 1 ? 'topic' : 'topics'}` : '', nDue ? `${nDue} ${nDue === 1 ? 'deadline' : 'deadlines'}` : ''].filter(Boolean).join(' and ')} to ${course.code}`,
+      })
       onClose()
     } catch (err) {
       toast.error(err, topicsSaved ? 'Topics were added, but the deadlines failed. Try again to add just the deadlines.' : 'Could not import. Nothing was saved; try again.')

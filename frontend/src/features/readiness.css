@@ -1,0 +1,86 @@
+/* Upcoming tests on a course: countdown plus how solid the covered topics feel. */
+.ready {
+  margin-bottom: 1.25rem;
+}
+.ready__list {
+  display: grid;
+}
+.ready__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.1rem;
+}
+.ready__item + .ready__item {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.ready__count {
+  display: grid;
+  justify-items: center;
+  min-width: 4.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.ready__count[data-soon] {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+.ready__days {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+}
+.ready__unit {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.ready__body {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.ready__title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  font-weight: 540;
+}
+.ready__date {
+  font-size: var(--text-sm);
+  font-weight: 400;
+}
+.ready__line {
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+.ready__line strong {
+  color: var(--text);
+  font-weight: 560;
+}
+.ready__actions {
+  display: grid;
+  justify-items: end;
+  gap: 0.35rem;
+}
+.ready__actions .panel__link {
+  margin: 0;
+}
+@media (max-width: 720px) {
+  .ready__item {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.8rem;
+  }
+  .ready__actions {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}

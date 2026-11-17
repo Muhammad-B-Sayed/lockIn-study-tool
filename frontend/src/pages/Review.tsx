@@ -69,7 +69,7 @@ function ReviewView({ s, now }: { s: StudyIndex; now: Date }) {
           <h1 className="page-head__title t-display">
             {view === 'groups' ? (
               <>
-                Where your <span className="tabular">{cov.eligible}</span> topics stand
+                Where your <span className="tabular">{cov.eligible}</span> {cov.eligible === 1 ? 'topic stands' : 'topics stand'}
               </>
             ) : ranked.length ? (
               <>
@@ -181,7 +181,7 @@ function CoverageMeter({ counts, eligible, scope }: { counts: Record<Confidence,
   return (
     <div className="meter">
       <p className="meter__caption t-eyebrow">
-        {eligible} topics {scope}
+        {eligible} {eligible === 1 ? 'topic' : 'topics'} {scope}
         {counts.retired ? `, plus ${counts.retired} set aside` : ''}
       </p>
       <div className="meter__bar" role="img" aria-label={order.map((c) => `${counts[c]} ${CONFIDENCE[c].label}`).join(', ')}>

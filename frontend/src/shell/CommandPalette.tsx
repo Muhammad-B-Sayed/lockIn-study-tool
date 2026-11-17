@@ -4,6 +4,8 @@ import { useAssessmentMutations, useTopicMutations } from '../lib/data'
 import { parseQuickAdd, today } from '../lib/domain'
 import { formatDate } from '../app/format'
 import { useNow, useStudy } from '../app/useStudy'
+import { useTheme } from '../app/theme'
+import { useExportCalendar } from '../features/useExportCalendar'
 import { Icon, type IconName } from '../ui/Icon'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { CourseTag } from '../ui/study'
@@ -28,7 +30,7 @@ const PAGES: { label: string; to: string; icon: IconName; keywords: string }[] =
   { label: 'Calendar', to: '/app/calendar', icon: 'calendar', keywords: 'week month schedule' },
   { label: 'Courses', to: '/app/courses', icon: 'courses', keywords: 'classes syllabus' },
   { label: 'Lock in', to: '/app/focus', icon: 'lock', keywords: 'focus timer pomodoro study session' },
-  { label: 'Settings', to: '/app/settings', icon: 'settings', keywords: 'account theme password export' },
+  { label: 'Settings', to: '/app/settings', icon: 'settings', keywords: 'account theme password export import ics calendar file daily goal break length shortcuts' },
 ]
 
 function score(hay: string, q: string) {
@@ -55,6 +57,8 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
   const toast = useToast()
   const topicsM = useTopicMutations()
   const assessM = useAssessmentMutations()
+  const { setPref, resolved } = useTheme()
+  const exportCalendar = useExportCalendar()
 
   useEffect(() => {
     const el = ref.current
@@ -156,6 +160,35 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
         out.push({ id: `page-${p.to}`, group: 'Go to', label: p.label, icon: p.icon, run: go(p.to) })
       }
     }
+    const dark = resolved === 'dark'
+    const actions: { id: string; label: string; icon: IconName; keywords: string; run: () => void }[] = [
+      {
+        id: 'theme',
+        label: dark ? 'Switch to light mode' : 'Switch to dark mode',
+        icon: dark ? 'sun' : 'moon',
+        keywords: 'theme dark light mode appearance',
+        run: () => {
+          onClose()
+          setPref(dark ? 'light' : 'dark')
+        },
+      },
+      {
+        id: 'ics',
+        label: 'Export calendar file',
+        icon: 'download',
+        keywords: 'ics calendar export google apple outlook',
+        run: () => {
+          onClose()
+          exportCalendar()
+        },
+      },
+    ]
+    // Actions show only for a query, so the empty palette stays a list of places.
+    if (query) {
+      for (const a of actions) {
+        if (score(`${a.label} ${a.keywords}`, query)) out.push({ id: `action-${a.id}`, group: 'Actions', label: a.label, icon: a.icon, run: a.run })
+      }
+    }
     if (data) {
       const courses = data.ws.courses
         .map((c) => ({ c, s: Math.max(score(c.code, query), score(c.name, query)) }))
@@ -166,17 +199,24 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
         out.push({ id: `course-${c.id}`, group: 'Courses', label: c.name, course: c, run: go(`/app/courses/${c.id}`) })
       }
       if (query) {
+        // Title matches rank first. A match only in the summary or notes still shows, below them.
+        const inText = (t: { details: string | null; notes: string }) =>
+          query.length > 2 && `${t.details ?? ''}\n${t.notes}`.toLowerCase().includes(query)
         const topics = data.ws.topics
-          .map((t) => ({ t, s: score(t.title, query) }))
+          .map((t) => {
+            const title = score(t.title, query)
+            return { t, s: title ? title + 1 : inText(t) ? 1 : 0, inNotes: !title }
+          })
           .filter((x) => x.s > 0)
           .sort((a, b) => b.s - a.s)
           .slice(0, 7)
-        for (const { t } of topics) {
+        for (const { t, inNotes } of topics) {
           out.push({
             id: `topic-${t.id}`,
             group: 'Topics',
             label: t.title,
             lead: <ConfidenceGlyph value={t.confidence} />,
+            sub: inNotes ? 'Matches your notes' : undefined,
             course: data.courseById.get(t.courseId),
             run: go(`/app/topics/${t.id}`),
           })
@@ -199,7 +239,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
       }
     }
     return out
-  }, [q, data, now, navigate, onClose, toast, topicsM, assessM])
+  }, [q, data, now, navigate, onClose, toast, topicsM, assessM, resolved, setPref, exportCalendar])
 
   useEffect(() => {
     document.getElementById(`cmd-${items[active]?.id}`)?.scrollIntoView({ block: 'nearest' })

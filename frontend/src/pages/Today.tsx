@@ -1,10 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { coverage, currentStreak, relativeDue, diffDays, formatTime, rankReview, studyMinutesByDay, today } from '../lib/domain'
 import { formatDate, localDate } from '../app/format'
 import type { Assessment, CalendarEvent, Topic } from '../lib/data/types'
 import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { DeadlineRow, ReviewRow } from '../features/rows'
+import { AssessmentDialog } from '../features/forms'
+import { WeekPanel } from '../features/WeekPanel'
 import { startFocus, useRateWithUndo, useToggleDone } from '../features/actions'
 import { Icon } from '../ui/Icon'
 import { Button, EmptyState } from '../ui/primitives'
@@ -25,6 +27,7 @@ function TodayView({ s, now }: { s: StudyIndex; now: Date }) {
   const navigate = useNavigate()
   const rate = useRateWithUndo()
   const toggle = useToggleDone()
+  const [editing, setEditing] = useState<Assessment | null>(null)
   const todayKey = today(now)
 
   const ranked = useMemo(() => rankReview(s.ws, now), [s.ws, now])
@@ -147,7 +150,7 @@ function TodayView({ s, now }: { s: StudyIndex; now: Date }) {
             )}
           </section>
 
-          <StudyRhythm s={s} now={now} />
+          <WeekPanel s={s} now={now} />
         </div>
 
         <div className="today__col today__col--side">
@@ -166,20 +169,28 @@ function TodayView({ s, now }: { s: StudyIndex; now: Date }) {
               <ul className="deadline-list">
                 {overdue.length ? <li className="deadline-group t-eyebrow">Overdue</li> : null}
                 {overdue.map((a) => (
-                  <DeadlineRow key={a.id} a={a} now={now} course={a.courseId ? s.courseById.get(a.courseId) : undefined} onToggle={() => toggle(a)} />
+                  <DeadlineRow key={a.id} a={a} now={now} course={a.courseId ? s.courseById.get(a.courseId) : undefined} onToggle={() => toggle(a)} onEdit={() => setEditing(a)} />
                 ))}
                 {overdue.length && dueSoon.length ? <li className="deadline-group t-eyebrow">Next 7 days</li> : null}
                 {dueSoon.map((a) => (
-                  <DeadlineRow key={a.id} a={a} now={now} course={a.courseId ? s.courseById.get(a.courseId) : undefined} onToggle={() => toggle(a)} />
+                  <DeadlineRow key={a.id} a={a} now={now} course={a.courseId ? s.courseById.get(a.courseId) : undefined} onToggle={() => toggle(a)} onEdit={() => setEditing(a)} />
                 ))}
                 {recentlyDone.map((a) => (
-                  <DeadlineRow key={a.id} a={a} now={now} course={a.courseId ? s.courseById.get(a.courseId) : undefined} onToggle={() => toggle(a)} />
+                  <DeadlineRow key={a.id} a={a} now={now} course={a.courseId ? s.courseById.get(a.courseId) : undefined} onToggle={() => toggle(a)} onEdit={() => setEditing(a)} />
                 ))}
               </ul>
             ) : (
               <p className="panel__empty">Nothing due in the next seven days.</p>
             )}
           </section>
+          <AssessmentDialog
+            open={editing !== null}
+            onClose={() => setEditing(null)}
+            assessment={editing ?? undefined}
+            courses={s.activeCourses}
+            topics={s.ws.topics}
+            defaultCourseId={editing?.courseId ?? undefined}
+          />
 
           <section className="panel" aria-labelledby="term-h">
             <header className="panel__head">
@@ -211,7 +222,7 @@ function TodayView({ s, now }: { s: StudyIndex; now: Date }) {
             </ul>
             <ConfidenceKey withRetired={s.ws.topics.some((t) => t.confidence === 'retired')} />
           </section>
-
+          <StudyRhythm s={s} now={now} />
         </div>
       </div>
     </div>

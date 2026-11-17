@@ -8,6 +8,7 @@ import { formatDate } from '../app/format'
 import type { Assessment, CalendarEvent, Topic } from '../lib/data/types'
 import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { AssessmentDialog, EventDialog } from '../features/forms'
+import { useExportCalendar } from '../features/useExportCalendar'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { Icon } from '../ui/Icon'
 import { Menu } from '../ui/Menu'
@@ -49,6 +50,7 @@ function CalendarView({ s, now }: { s: StudyIndex; now: Date }) {
   const [picked, setPicked] = useState(day)
   const { update } = useTopicMutations()
   const toast = useToast()
+  const exportCalendar = useExportCalendar()
 
   const set = (patch: Record<string, string | null>) => {
     const p = new URLSearchParams(params)
@@ -173,9 +175,12 @@ function CalendarView({ s, now }: { s: StudyIndex; now: Date }) {
         <span>
           <span className="lg lg--event" /> Your events
         </span>
+        <Button variant="ghost" size="sm" icon="download" className="cal__export" onClick={exportCalendar} title="Download an .ics file for Google Calendar, Apple Calendar or Outlook">
+          Export .ics
+        </Button>
         {unplanned.length ? (
           <button type="button" className="cal__unplanned-btn" aria-expanded={unplannedOpen} onClick={() => setUnplannedOpen((o) => !o)}>
-            <Icon name="grip" size={14} /> {unplanned.length} topics without a date
+            <Icon name="grip" size={14} /> {unplanned.length} {unplanned.length === 1 ? 'topic' : 'topics'} without a date
           </button>
         ) : null}
       </div>

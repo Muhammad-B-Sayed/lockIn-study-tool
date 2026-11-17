@@ -326,6 +326,21 @@ a.clock__title:hover {
 .checkin__actions .btn--ghost {
   margin-right: auto;
 }
+.checkin__discard {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-right: auto;
+}
+.checkin__discard .btn--ghost {
+  margin-right: 0;
+}
+.checkin__discard-q {
+  font-size: var(--text-sm);
+  font-weight: 520;
+  color: var(--danger);
+}
 .checkin__need {
   font-size: var(--text-xs);
   text-align: right;

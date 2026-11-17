@@ -1,9 +1,13 @@
 import {
+  cloneElement,
   forwardRef,
+  isValidElement,
   useEffect,
   useRef,
+  useState,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
+  type ReactElement,
   type ReactNode,
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
@@ -82,6 +86,17 @@ type FieldShellProps = {
 }
 
 export function Field({ label, hint, error, children, htmlFor, optional }: FieldShellProps) {
+  // Tie the message to the control, so a screen reader reads the error or hint with the field.
+  const describedBy = error ? `${htmlFor}-error` : hint ? `${htmlFor}-hint` : undefined
+  if (isValidElement(children) && (children.props as { id?: string }).id === htmlFor && typeof children.type !== 'string') {
+    const el = children as ReactElement<Record<string, unknown>>
+    if (el.type === Input || el.type === Textarea || el.type === Select) {
+      children = cloneElement(el, {
+        'aria-invalid': error ? true : (el.props['aria-invalid'] as boolean | undefined),
+        'aria-describedby': (el.props['aria-describedby'] as string | undefined) ?? describedBy,
+      })
+    }
+  }
   return (
     <div className={['field', error ? 'field--error' : ''].join(' ')}>
       <label className="field__label" htmlFor={htmlFor}>
@@ -194,13 +209,35 @@ export function Dialog({
   size?: 'sm' | 'md' | 'lg'
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  // A drag that starts inside the panel (selecting text in a field) and ends on the backdrop is not a dismissal.
+  const pressedBackdrop = useRef(false)
+  // Escape and a backdrop click ask first once a field has been typed in. Cancel and the close button are explicit.
+  const dirty = useRef(false)
+  const [asking, setAsking] = useState(false)
+  // A dialog closed by Cancel, Save or the close button must not reopen with the question showing.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (wasOpen !== open) {
+    setWasOpen(open)
+    if (!open) setAsking(false)
+  }
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
     if (open && !el.open) el.showModal()
     if (!open && el.open) el.close()
+    if (!open) dirty.current = false
   }, [open])
+
+  const dismiss = () => {
+    if (dirty.current) setAsking(true)
+    else onClose()
+  }
+  const discard = () => {
+    dirty.current = false
+    setAsking(false)
+    onClose()
+  }
 
   return (
     <dialog
@@ -208,10 +245,18 @@ export function Dialog({
       className={`dialog dialog--${size}`}
       onCancel={(e) => {
         e.preventDefault()
-        onClose()
+        if (asking) setAsking(false)
+        else dismiss()
+      }}
+      onInput={() => {
+        dirty.current = true
+      }}
+      onPointerDown={(e) => {
+        pressedBackdrop.current = e.target === e.currentTarget
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
+        if (e.target === e.currentTarget && pressedBackdrop.current) dismiss()
+        pressedBackdrop.current = false
       }}
       aria-labelledby="dialog-title"
     >
@@ -227,6 +272,17 @@ export function Dialog({
             <IconButton icon="close" label="Close" onClick={onClose} size="sm" />
           </header>
           <div className="dialog__body">{children}</div>
+          {asking && open ? (
+            <div className="dialog__guard" role="alert">
+              <span className="dialog__guard-q">Discard what you typed?</span>
+              <Button variant="ghost" size="sm" autoFocus onClick={() => setAsking(false)}>
+                Keep editing
+              </Button>
+              <Button variant="danger" size="sm" onClick={discard}>
+                Discard
+              </Button>
+            </div>
+          ) : null}
           {footer ? <footer className="dialog__foot">{footer}</footer> : null}
         </div>
       ) : null}

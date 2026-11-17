@@ -1,5 +1,8 @@
 .cal {
   max-width: 1320px;
+  /* start on the same left edge as every other page; the extra width extends to the right */
+  margin-left: max(0px, calc((100% - var(--content-max)) / 2));
+  margin-right: auto;
 }
 .cal__actions {
   align-items: center;
@@ -757,4 +760,8 @@
 
 .block__time {
   color: var(--text-2);
+}
+
+.cal__export {
+  margin-left: auto;
 }
