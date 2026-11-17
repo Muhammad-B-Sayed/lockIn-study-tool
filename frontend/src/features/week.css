@@ -159,6 +159,11 @@
   font-size: var(--text-sm);
   color: var(--text-2);
 }
+.week__log-btn {
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  font-family: var(--font-ui);
+}
 .week__more {
   margin-top: 0.35rem;
 }
@@ -181,4 +186,22 @@
     grid-column: 1 / -1;
     margin-bottom: -0.35rem;
   }
+}
+
+/* Session notes on a topic: the note wraps instead of truncating. */
+.week__entry-quote {
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+.facts .week__entry {
+  grid-template-columns: 3.6rem minmax(0, 1fr) auto auto;
+  align-items: start;
+}
+.facts .week__entry-when,
+.facts .week__entry-min {
+  padding-top: 0.15rem;
+}
+.facts .week__entry-when {
+  grid-column: auto;
+  margin-bottom: 0;
 }

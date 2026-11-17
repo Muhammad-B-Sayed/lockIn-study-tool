@@ -7,6 +7,7 @@ import type { Assessment, Course as CourseT, Topic } from '../lib/data/types'
 import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { AssessmentDialog, CourseDialog, SyllabusDialog } from '../features/forms'
 import { DeadlineRow, ReviewRow } from '../features/rows'
+import { GradesPanel } from '../features/GradesPanel'
 import { startFocus, useRateWithUndo, useToggleDone } from '../features/actions'
 import { Icon } from '../ui/Icon'
 import { Menu } from '../ui/Menu'
@@ -250,6 +251,8 @@ function CourseView({ c, s, now }: { c: CourseT; s: StudyIndex; now: Date }) {
             )}
           </section>
 
+          <GradesPanel course={c} assessments={deadlines} />
+
           {topics.length ? (
           <section className="panel course__review" id="review-next" aria-labelledby="crq-h">
             <header className="panel__head">
@@ -293,7 +296,7 @@ function CourseView({ c, s, now }: { c: CourseT; s: StudyIndex; now: Date }) {
         onClose={() => setConfirmDelete(false)}
         size="sm"
         title={`Delete ${c.code}?`}
-        description={`This removes ${topics.length} topics, ${deadlines.length} deadlines and their review history. It cannot be undone. Moving it to past courses keeps everything.`}
+        description={`This removes ${topics.length} ${topics.length === 1 ? 'topic' : 'topics'}, ${deadlines.length} ${deadlines.length === 1 ? 'deadline' : 'deadlines'} and their review history. It cannot be undone. Moving it to past courses keeps everything.`}
         footer={
           <>
             <Button variant="ghost" onClick={() => setConfirmDelete(false)}>

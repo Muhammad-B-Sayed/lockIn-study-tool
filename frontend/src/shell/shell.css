@@ -595,6 +595,13 @@
   .palette__sub {
     margin-left: 28px;
   }
+  /* second line: the course tag lines up under the label, and the detail follows it */
+  .palette__label + .course-tag {
+    margin-left: 28px;
+  }
+  .palette__label + .course-tag + .palette__sub {
+    margin-left: 0;
+  }
   .palette__enter {
     display: none;
   }
@@ -734,6 +741,11 @@
   .tabbar__lock-label {
     position: static !important;
     translate: none !important;
-    font-size: 10.5px;
+    font-size: var(--text-xs);
+  }
+  /* 44px touch targets for the two top bar actions */
+  .topbar__actions .icon-btn {
+    width: 44px;
+    height: 44px;
   }
 }

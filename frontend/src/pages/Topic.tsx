@@ -6,6 +6,7 @@ import { formatDate, localDate } from '../app/format'
 import type { Topic as TopicT, TopicPatch } from '../lib/data/types'
 import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { startFocus, useRateWithUndo } from '../features/actions'
+import { LogTimeButton, TopicSessions } from '../features/WeekPanel'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { CONFIDENCE } from '../ui/confidenceMeta'
 import { Icon } from '../ui/Icon'
@@ -247,7 +248,10 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
             <dl className="facts__list">
               <div>
                 <dt>Focused time</dt>
-                <dd className="t-mono">{minutes ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : 'None yet'}</dd>
+                <dd className="t-mono">
+                  {minutes ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : 'None yet'}
+                  <LogTimeButton s={s} topicId={t.id} />
+                </dd>
               </div>
               <div>
                 <dt>Reviews</dt>
@@ -271,6 +275,7 @@ function TopicView({ t, s, now }: { t: TopicT; s: StudyIndex; now: Date }) {
                 </ul>
               </>
             ) : null}
+            <TopicSessions s={s} topicId={t.id} day={today(now)} />
           </section>
         </aside>
       </div>

@@ -6,6 +6,8 @@ import type { Confidence, Topic } from '../lib/data/types'
 import { elapsedMs, focus, formatClock, useFocusRun, useTick, type FocusRun } from '../app/focusStore'
 import { useNow, useStudy, type StudyIndex } from '../app/useStudy'
 import { useRateWithUndo } from '../features/actions'
+import { offerBreak } from '../app/breakStore'
+import { usePrefs } from '../app/prefs'
 import { ConfidenceGlyph } from '../ui/confidence'
 import { CONFIDENCE, RATABLE } from '../ui/confidenceMeta'
 import { Button, Kbd, Select } from '../ui/primitives'
@@ -260,6 +262,7 @@ function CheckIn({ s, done, onClose }: { s: StudyIndex; done: { run: FocusRun; m
   const navigate = useNavigate()
   const toast = useToast()
   const rate = useRateWithUndo()
+  const { breakMinutes } = usePrefs()
   const { create } = useSessionMutations()
   const topic: Topic | undefined = done.run.topicId ? s.topicById.get(done.run.topicId) : undefined
   const course = topic ? s.courseById.get(topic.courseId) : undefined
@@ -267,6 +270,7 @@ function CheckIn({ s, done, onClose }: { s: StudyIndex; done: { run: FocusRun; m
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [sessionSaved, setSessionSaved] = useState(false)
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
   const minutes = Math.max(1, Math.round(done.ms / 60_000))
 
   const save = async () => {
@@ -287,6 +291,7 @@ function CheckIn({ s, done, onClose }: { s: StudyIndex; done: { run: FocusRun; m
         const ok = await rate(topic, rating, 'focus')
         if (!ok) return
       } else toast.show({ message: `Logged ${minutes} min` })
+      offerBreak(toast, breakMinutes)
       focus.clear()
       onClose()
       navigate(topic ? `/app/topics/${topic.id}` : '/app')
@@ -330,16 +335,29 @@ function CheckIn({ s, done, onClose }: { s: StudyIndex; done: { run: FocusRun; m
           <input className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Got stuck on the TLB miss path; redo example 3" maxLength={240} />
         </label>
         <div className="checkin__actions">
-          <Button
-            variant="ghost"
-            onClick={() => {
-              focus.clear()
-              onClose()
-              navigate('/app')
-            }}
-          >
-            Discard session
-          </Button>
+          {confirmDiscard ? (
+            <span className="checkin__discard" role="group" aria-label="Discard this session?">
+              <span className="checkin__discard-q">Throw away {minutes} min?</span>
+              <Button variant="ghost" size="sm" autoFocus onClick={() => setConfirmDiscard(false)}>
+                Keep
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => {
+                  focus.clear()
+                  onClose()
+                  navigate('/app')
+                }}
+              >
+                Discard
+              </Button>
+            </span>
+          ) : (
+            <Button variant="ghost" onClick={() => setConfirmDiscard(true)}>
+              Discard session
+            </Button>
+          )}
           <Button variant="secondary" icon="play" onClick={onClose}>
             Keep going
           </Button>

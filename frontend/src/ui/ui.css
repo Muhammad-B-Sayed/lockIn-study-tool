@@ -121,6 +121,17 @@
   background: var(--surface-3);
   color: var(--text);
 }
+/* a disabled icon button looks disabled and does not light up on hover */
+.icon-btn:disabled,
+.icon-btn:disabled:hover {
+  opacity: 0.38;
+  background: transparent;
+  color: var(--text-2);
+}
+.icon-btn--secondary:disabled,
+.icon-btn--secondary:disabled:hover {
+  background: var(--surface-2);
+}
 
 .kbd {
   display: inline-grid;
@@ -459,6 +470,10 @@
 .dialog__foot .spacer {
   flex: 1;
 }
+/* A confirmation has no body of its own: do not leave an empty block above the buttons. */
+.dialog__body:has(> .sr-only:only-child) {
+  padding-block: 0.6rem;
+}
 @keyframes dialog-in {
   from {
     opacity: 0;
@@ -482,6 +497,15 @@
     border-radius: var(--r-xl) var(--r-xl) 0 0;
     max-height: 92dvh;
     padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* 44px touch targets on phones */
+  .dialog__head .icon-btn {
+    width: 44px;
+    height: 44px;
+    margin: -6px -6px 0 0;
+  }
+  .dialog__foot .btn:not(.btn--sm) {
+    --btn-h: 44px;
   }
   .dialog[open] .dialog__panel {
     animation: sheet-in var(--dur-3) var(--ease-out);
@@ -510,7 +534,8 @@
     left: 50%;
     right: auto;
     translate: -50% 0;
-    bottom: calc(var(--tabbar-h) + 1rem + env(safe-area-inset-bottom));
+    /* clear the raised Focus button, which stands 20px above the tab bar */
+    bottom: calc(var(--tabbar-h) + 1.9rem + env(safe-area-inset-bottom));
   }
 }
 .toast {

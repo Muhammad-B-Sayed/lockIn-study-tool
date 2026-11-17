@@ -479,7 +479,7 @@
 }
 /* 9 keep the queue readable on wide screens */
 .review {
-  max-width: 1040px;
+  max-width: var(--content-max);
 }
 
 .group[data-conf='retired'] .group__list {

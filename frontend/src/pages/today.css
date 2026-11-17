@@ -276,3 +276,18 @@ a.today__cta-on {
 a.today__cta-on:hover {
   color: var(--text);
 }
+/* a real target next to the big button, not a stray line of small text */
+a.today__cta-on {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 0.5rem;
+  font-weight: 520;
+}
+@media (max-width: 640px) {
+  a.today__cta-on {
+    width: 100%;
+    margin-top: -0.4rem;
+  }
+}

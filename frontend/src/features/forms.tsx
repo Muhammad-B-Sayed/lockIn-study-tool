@@ -34,6 +34,13 @@ function ColorPicker({ value, onChange }: { value: ColorKey; onChange: (c: Color
 
 const emptyToNull = (s: string) => (s.trim() ? s.trim() : null)
 
+/** After a failed submit, put the cursor in the first field that needs fixing. */
+function focusFirstError(formId: string) {
+  requestAnimationFrame(() => {
+    document.getElementById(formId)?.querySelector<HTMLElement>('.field--error :is(input, select, textarea, button)')?.focus()
+  })
+}
+
 /** Delete with a second step, so one stray click cannot remove something for good. */
 function ConfirmDelete({ what, onDelete }: { what: string; onDelete: () => Promise<void> }) {
   const [armed, setArmed] = useState(false)
@@ -109,7 +116,7 @@ function CourseDialogBody({
     if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) errs.email = 'That email looks off.'
     if (website.trim() && !/^https?:\/\//i.test(website.trim())) errs.website = 'Start the link with https://'
     setErrors(errs)
-    if (Object.keys(errs).length) return
+    if (Object.keys(errs).length) return focusFirstError(`${id}-form`)
     setBusy(true)
     const input = {
       code: code.trim().toUpperCase(),
@@ -233,7 +240,7 @@ function AssessmentDialogBody({
     const w = weight.trim() ? Number(weight) : null
     if (w !== null && (Number.isNaN(w) || w < 0 || w > 100)) errs.weight = 'Use a number from 0 to 100.'
     setErrors(errs)
-    if (Object.keys(errs).length) return
+    if (Object.keys(errs).length) return focusFirstError(`${id}-form`)
     setBusy(true)
     const input = {
       title: title.trim(),
@@ -272,7 +279,12 @@ function AssessmentDialogBody({
               onDelete={async () => {
                 try {
                   await m.remove(assessment.id)
-                  toast.show({ message: `Deleted ${assessment.title}` })
+                  const a = assessment
+                  const restore = { courseId: a.courseId, title: a.title, kind: a.kind, dueDate: a.dueDate, dueTime: a.dueTime, weight: a.weight, done: a.done, notes: a.notes, topicIds: a.topicIds }
+                  toast.show({
+                    message: `Deleted ${assessment.title}`,
+                    action: { label: 'Undo', run: async () => { await m.create(restore) } },
+                  })
                   onClose()
                 } catch (err) {
                   toast.error(err)
@@ -342,7 +354,7 @@ function AssessmentDialogBody({
             </summary>
             <p className="field__hint">Linked topics climb the review queue as this date gets close.</p>
             <div className="link-topics__tools">
-              <Input value={topicQuery} onChange={(e) => setTopicQuery(e.target.value)} placeholder={`Search ${courseTopics.length} topics`} aria-label="Search topics" className="topic-filter" />
+              <Input value={topicQuery} onChange={(e) => setTopicQuery(e.target.value)} placeholder={courseTopics.length === 1 ? 'Search 1 topic' : `Search ${courseTopics.length} topics`} aria-label="Search topics" className="topic-filter" />
               <Button
                 size="sm"
                 variant="ghost"
@@ -408,13 +420,16 @@ function EventDialogBody({
   const [end, setEnd] = useState(event?.endTime ?? '')
   const [color, setColor] = useState<ColorKey>(event?.color ?? 'slate')
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState<{ title?: string; end?: string }>({})
 
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!title.trim()) return setError('Give it a name.')
-    if (start && end && end <= start) return setError('End after it starts.')
+    const errs: typeof errors = {}
+    if (!title.trim()) errs.title = 'Give it a name.'
+    if (start && end && end <= start) errs.end = 'Must be after the start.'
+    setErrors(errs)
+    if (Object.keys(errs).length) return focusFirstError(`${id}-form`)
     setBusy(true)
     const input = { title: title.trim(), date, startTime: start || null, endTime: end || null, color, done: event?.done ?? false }
     try {
@@ -444,7 +459,11 @@ function EventDialogBody({
               onDelete={async () => {
                 try {
                   await m.remove(event.id)
-                  toast.show({ message: `Deleted ${event.title}` })
+                  const restore = { title: event.title, date: event.date, startTime: event.startTime, endTime: event.endTime, color: event.color, done: event.done }
+                  toast.show({
+                    message: `Deleted ${event.title}`,
+                    action: { label: 'Undo', run: async () => { await m.create(restore) } },
+                  })
                   onClose()
                 } catch (err) {
                   toast.error(err)
@@ -457,13 +476,13 @@ function EventDialogBody({
             Cancel
           </Button>
           <Button variant="primary" type="submit" form={`${id}-form`} loading={busy}>
-            Save
+            {event ? 'Save' : 'Add event'}
           </Button>
         </>
       }
     >
       <form id={`${id}-form`} className="form-grid" onSubmit={submit} noValidate>
-        <Field label="Title" htmlFor={`${id}-t`} error={error}>
+        <Field label="Title" htmlFor={`${id}-t`} error={errors.title}>
           <Input id={`${id}-t`} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Shift at the library" autoFocus />
         </Field>
         <div className="form-row form-row--3">
@@ -473,7 +492,7 @@ function EventDialogBody({
           <Field label="Start" htmlFor={`${id}-s`} optional>
             <PickerField id={`${id}-s`} type="time" icon="clock" label="Start" value={start} display={start ? formatTime(start) : ''} placeholder="Any time" onChange={(v) => setStart(v)} onClear={() => setStart('')} />
           </Field>
-          <Field label="End" htmlFor={`${id}-e`} optional>
+          <Field label="End" htmlFor={`${id}-e`} optional error={errors.end}>
             <PickerField id={`${id}-e`} type="time" icon="clock" label="End" value={end} display={end ? formatTime(end) : ''} placeholder="Any time" onChange={(v) => setEnd(v)} onClear={() => setEnd('')} />
           </Field>
         </div>
@@ -570,7 +589,9 @@ function SyllabusDialogBody({ open, onClose, course, startPosition }: { open: bo
           })),
         )
       }
-      toast.show({ message: `Added ${nTopics} topics and ${nDue} deadlines to ${course.code}` })
+      toast.show({
+        message: `Added ${[nTopics ? `${nTopics} ${nTopics === 1 ? 'topic' : 'topics'}` : '', nDue ? `${nDue} ${nDue === 1 ? 'deadline' : 'deadlines'}` : ''].filter(Boolean).join(' and ')} to ${course.code}`,
+      })
       onClose()
     } catch (err) {
       toast.error(err, topicsSaved ? 'Topics were added, but the deadlines failed. Try again to add just the deadlines.' : 'Could not import. Nothing was saved; try again.')

@@ -175,7 +175,7 @@ function CalendarView({ s, now }: { s: StudyIndex; now: Date }) {
         </span>
         {unplanned.length ? (
           <button type="button" className="cal__unplanned-btn" aria-expanded={unplannedOpen} onClick={() => setUnplannedOpen((o) => !o)}>
-            <Icon name="grip" size={14} /> {unplanned.length} topics without a date
+            <Icon name="grip" size={14} /> {unplanned.length} {unplanned.length === 1 ? 'topic' : 'topics'} without a date
           </button>
         ) : null}
       </div>

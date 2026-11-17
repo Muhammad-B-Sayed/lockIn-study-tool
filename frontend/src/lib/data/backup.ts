@@ -32,7 +32,7 @@ function check(label: string, index: number, fn: () => void) {
     fn()
   } catch (error) {
     const reason = error instanceof Error ? error.message : 'is not valid'
-    throw new Error(`${label} ${index + 1}: ${reason}`)
+    throw new Error(`${label} ${index + 1}: ${reason}`, { cause: error })
   }
 }
 

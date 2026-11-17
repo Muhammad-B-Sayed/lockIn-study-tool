@@ -13,11 +13,69 @@ import { CourseTag } from '../ui/study'
 import { useToast } from '../ui/toastContext'
 import './week.css'
 
+/** Remove a session, with an Undo toast that logs it again. */
+function useRemoveSession() {
+  const toast = useToast()
+  const { create, remove } = useSessionMutations()
+  return async (x: StudySession) => {
+    try {
+      await remove(x.id)
+      toast.show({
+        message: `Removed ${formatMinutes(x.minutes)} session`,
+        action: {
+          label: 'Undo',
+          run: async () => {
+            await create({ topicId: x.topicId, courseId: x.courseId, startedAt: x.startedAt, minutes: x.minutes, note: x.note })
+          },
+        },
+      })
+    } catch (err) {
+      toast.error(err, 'Could not remove that session.')
+    }
+  }
+}
+
+/** Every session logged on one topic, newest first, with the note left for later. */
+export function TopicSessions({ s, topicId, day }: { s: StudyIndex; topicId: string; day: string }) {
+  const removeSession = useRemoveSession()
+  const [showAll, setShowAll] = useState(false)
+  const all = useMemo(
+    () => s.ws.sessions.filter((x) => x.topicId === topicId).sort((a, b) => b.startedAt.localeCompare(a.startedAt)),
+    [s.ws.sessions, topicId],
+  )
+  if (!all.length) return null
+  const shown = showAll ? all : all.slice(0, 4)
+  return (
+    <>
+      <h3 className="week__sub t-eyebrow">Sessions and notes to self</h3>
+      <ul className="week__log">
+        {shown.map((x) => {
+          const date = localDate(x.startedAt)
+          return (
+            <li key={x.id} className="week__entry">
+              <span className="week__entry-when tabular">{date === day ? 'Today' : formatDate(date, { month: 'short', day: 'numeric' })}</span>
+              <span className="week__entry-main">
+                <span className={x.note ? 'week__entry-quote' : 'week__entry-quote t-faint'}>{x.note ?? 'No note'}</span>
+              </span>
+              <span className="week__entry-min tabular">{formatMinutes(x.minutes)}</span>
+              <IconButton icon="trash" size="sm" label={`Remove ${formatMinutes(x.minutes)} session`} onClick={() => removeSession(x)} />
+            </li>
+          )
+        })}
+      </ul>
+      {all.length > 4 ? (
+        <Button size="sm" variant="ghost" className="week__more" aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
+          {showAll ? 'Show fewer' : `Show all ${all.length}`}
+        </Button>
+      ) : null}
+    </>
+  )
+}
+
 /** This week against last week, the daily goal, time per course, and the recent session log. */
 export function WeekPanel({ s, now }: { s: StudyIndex; now: Date }) {
   const prefs = usePrefs()
-  const toast = useToast()
-  const { create, remove } = useSessionMutations()
+  const removeSession = useRemoveSession()
   const [logging, setLogging] = useState(false)
   const [showAll, setShowAll] = useState(false)
   const stats = useMemo(() => weekStats(s.ws, now), [s.ws, now])
@@ -35,23 +93,6 @@ export function WeekPanel({ s, now }: { s: StudyIndex; now: Date }) {
     [s.ws.sessions, day],
   )
   const shown = showAll ? recent : recent.slice(0, 4)
-
-  const removeSession = async (x: StudySession) => {
-    try {
-      await remove(x.id)
-      toast.show({
-        message: `Removed ${formatMinutes(x.minutes)} session`,
-        action: {
-          label: 'Undo',
-          run: async () => {
-            await create({ topicId: x.topicId, courseId: x.courseId, startedAt: x.startedAt, minutes: x.minutes, note: x.note })
-          },
-        },
-      })
-    } catch (err) {
-      toast.error(err, 'Could not remove that session.')
-    }
-  }
 
   const compare =
     stats.previousToDate === 0 && stats.minutes === 0
@@ -202,6 +243,19 @@ export function WeekPanel({ s, now }: { s: StudyIndex; now: Date }) {
   )
 }
 
+/** A small "Log time" button with its own dialog, preset to one topic. */
+export function LogTimeButton({ s, topicId }: { s: StudyIndex; topicId: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <Button size="sm" variant="ghost" icon="plus" className="week__log-btn" onClick={() => setOpen(true)}>
+        Log time
+      </Button>
+      <LogTimeDialog open={open} onClose={() => setOpen(false)} s={s} day={today(new Date())} defaultTopicId={topicId} />
+    </>
+  )
+}
+
 export function LogTimeDialog(props: Parameters<typeof LogTimeBody>[0]) {
   return props.open ? <LogTimeBody {...props} /> : null
 }
@@ -272,7 +326,7 @@ function LogTimeBody({ open, onClose, s, day, defaultTopicId }: { open: boolean;
         <Field label="What you studied" htmlFor={`${id}-what`}>
           <Select id={`${id}-what`} value={target} onChange={(e) => setTarget(e.target.value)}>
             <option value="">No course, just study</option>
-            {s.activeCourses.map((c) => (
+            {[...s.activeCourses, ...s.archivedCourses.filter((c) => c.id === s.topicById.get(defaultTopicId ?? '')?.courseId)].map((c) => (
               <optgroup key={c.id} label={`${c.code} · ${c.name}`}>
                 <option value={`c:${c.id}`}>{c.code}, general study</option>
                 {(s.topicsByCourse.get(c.id) ?? []).map((t) => (

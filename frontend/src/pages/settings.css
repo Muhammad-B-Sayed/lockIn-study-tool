@@ -1,5 +1,8 @@
 .settings {
-  max-width: 860px;
+  max-width: var(--content-max);
+}
+.settings > * {
+  max-width: 780px;
 }
 .settings__list {
   display: grid;
@@ -17,6 +20,7 @@
   padding: 1.25rem 1.4rem;
 }
 .srow + .srow,
+.settings__list > .srow:not(:first-child),
 .settings__danger {
   border-top: 1px solid var(--line);
 }
@@ -74,4 +78,21 @@
   margin: 0;
   font-size: var(--text-sm);
   color: var(--text-2);
+}
+/* A long shortcut description wraps inside its column; it must not push the list under the heading. */
+.srow.kbd-hint {
+  align-items: flex-start;
+}
+.kbd-hint .srow__control {
+  flex: 0 1 360px;
+  min-width: 0;
+}
+.kbd-hint .keys {
+  width: 100%;
+}
+.keys > div {
+  align-items: start;
+}
+.keys dd .kbd {
+  margin-inline: 1px;
 }

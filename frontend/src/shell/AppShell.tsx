@@ -9,8 +9,10 @@ import { Icon, type IconName } from '../ui/Icon'
 import { Menu } from '../ui/Menu'
 import { Button, Kbd } from '../ui/primitives'
 import { CommandPalette } from './CommandPalette'
+import { FocusCompanion } from '../features/FocusCompanion'
 import { Wordmark } from './Wordmark'
 import { ignoreShortcut } from '../app/keys'
+import { useGoToKeys } from '../app/useGoToKeys'
 import './shell.css'
 
 const NAV: { to: string; label: string; icon: IconName; end?: boolean }[] = [
@@ -19,6 +21,15 @@ const NAV: { to: string; label: string; icon: IconName; end?: boolean }[] = [
   { to: '/app/calendar', label: 'Calendar', icon: 'calendar' },
   { to: '/app/courses', label: 'Courses', icon: 'courses' },
 ]
+
+const PAGE_TITLES: Record<string, string> = {
+  '/app': 'Today',
+  '/app/review': 'Review',
+  '/app/calendar': 'Calendar',
+  '/app/courses': 'Courses',
+  '/app/focus': 'Focus',
+  '/app/settings': 'Settings',
+}
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 
@@ -30,6 +41,7 @@ export function AppShell() {
   const location = useLocation()
   const [paletteOpen, setPaletteOpen] = useState(false)
   const { setPref, resolved } = useTheme()
+  useGoToKeys()
 
   const reviewCount = useMemo(() => (data ? rankReview(data.ws, now).length : 0), [data, now])
 
@@ -64,6 +76,17 @@ export function AppShell() {
   const topicMatch = location.pathname.match(/^\/app\/topics\/([^/]+)/)
   const onTopic = !!topicMatch
   const topicCourseId = topicMatch ? data?.topicById.get(topicMatch[1])?.courseId : undefined
+
+  // Name the browser tab after the page, so history, bookmarks and open tabs are tell-apart.
+  const courseMatch = location.pathname.match(/^\/app\/courses\/([^/]+)/)
+  const pageName = topicMatch
+    ? data?.topicById.get(topicMatch[1])?.title
+    : courseMatch
+      ? data?.courseById.get(courseMatch[1])?.code
+      : (PAGE_TITLES[location.pathname.replace(/\/$/, '')] ?? null)
+  useEffect(() => {
+    document.title = pageName ? `${pageName} · LockIn` : 'LockIn · Study planner'
+  }, [pageName])
 
   return (
     <div className="shell">
@@ -115,6 +138,7 @@ export function AppShell() {
                   to={`/app/courses/${c.id}`}
                   className={({ isActive }) => ['course-link', isActive || topicCourseId === c.id ? 'active' : ''].join(' ')}
                   data-hue={c.color}
+                  title={`${c.code} · ${c.name}`}
                 >
                   <span className="course-link__dot" aria-hidden />
                   <span className="course-link__code t-mono">{c.code}</span>
@@ -228,6 +252,7 @@ export function AppShell() {
       </nav>
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <FocusCompanion />
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { useTheme } from '../app/theme'
 import { Button, Dialog, Field, Input, Segmented } from '../ui/primitives'
 import { errorMessage, useToast } from '../ui/toastContext'
 import { Kbd } from '../ui/primitives'
+import { DataTools } from '../features/DataTools'
 import './settings.css'
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
@@ -78,6 +79,8 @@ export default function Settings() {
           </Button>
         </Row>
 
+        <DataTools />
+
         <Row title="Keyboard" body="Work without the mouse." className="kbd-hint">
           <dl className="keys">
             <div>
@@ -106,6 +109,15 @@ export default function Settings() {
                 <Kbd>space</Kbd>
               </dt>
               <dd>Pause or resume focus</dd>
+            </div>
+            <div>
+              <dt>
+                <Kbd>g</Kbd>
+                <Kbd>t</Kbd>
+              </dt>
+              <dd>
+                Go to Today. After <Kbd>g</Kbd>, also <Kbd>r</Kbd> Review, <Kbd>c</Kbd> Calendar, <Kbd>o</Kbd> Courses, <Kbd>f</Kbd> Focus, <Kbd>s</Kbd> Settings
+              </dd>
             </div>
           </dl>
         </Row>
@@ -195,11 +207,13 @@ function PasswordRow({ onChange }: { onChange: (current: string, next: string) =
   const [repeat, setRepeat] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErr, setFieldErr] = useState<{ next?: string; repeat?: string }>({})
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (next.length < 8) return setError('Use at least 8 characters.')
-    if (next !== repeat) return setError('The new passwords do not match.')
     setError(null)
+    if (next.length < 8) return setFieldErr({ next: 'Use at least 8 characters.' })
+    if (next !== repeat) return setFieldErr({ repeat: 'This does not match the new password.' })
+    setFieldErr({})
     setBusy(true)
     try {
       await onChange(current, next)
@@ -223,12 +237,17 @@ function PasswordRow({ onChange }: { onChange: (current: string, next: string) =
         <Field label="Current" htmlFor={`${id}-c`}>
           <Input id={`${id}-c`} type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} />
         </Field>
-        <Field label="New" htmlFor={`${id}-n`}>
+        <Field label="New" htmlFor={`${id}-n`} error={fieldErr.next}>
           <Input id={`${id}-n`} type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} />
         </Field>
-        <Field label="Repeat new" htmlFor={`${id}-r`} error={error}>
+        <Field label="Repeat new" htmlFor={`${id}-r`} error={fieldErr.repeat}>
           <Input id={`${id}-r`} type="password" autoComplete="new-password" value={repeat} onChange={(e) => setRepeat(e.target.value)} />
         </Field>
+        {error ? (
+          <p className="field__error pw__error" role="alert">
+            {error}
+          </p>
+        ) : null}
         <Button type="submit" loading={busy} disabled={!current || !next}>
           Change password
         </Button>
