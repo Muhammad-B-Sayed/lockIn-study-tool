@@ -28,7 +28,7 @@ const PAGES: { label: string; to: string; icon: IconName; keywords: string }[] =
   { label: 'Calendar', to: '/app/calendar', icon: 'calendar', keywords: 'week month schedule' },
   { label: 'Courses', to: '/app/courses', icon: 'courses', keywords: 'classes syllabus' },
   { label: 'Lock in', to: '/app/focus', icon: 'lock', keywords: 'focus timer pomodoro study session' },
-  { label: 'Settings', to: '/app/settings', icon: 'settings', keywords: 'account theme password export' },
+  { label: 'Settings', to: '/app/settings', icon: 'settings', keywords: 'account theme password export import ics calendar file daily goal break length shortcuts' },
 ]
 
 function score(hay: string, q: string) {
@@ -166,17 +166,24 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
         out.push({ id: `course-${c.id}`, group: 'Courses', label: c.name, course: c, run: go(`/app/courses/${c.id}`) })
       }
       if (query) {
+        // Title matches rank first. A match only in the summary or notes still shows, below them.
+        const inText = (t: { details: string | null; notes: string }) =>
+          query.length > 2 && `${t.details ?? ''}\n${t.notes}`.toLowerCase().includes(query)
         const topics = data.ws.topics
-          .map((t) => ({ t, s: score(t.title, query) }))
+          .map((t) => {
+            const title = score(t.title, query)
+            return { t, s: title ? title + 1 : inText(t) ? 1 : 0, inNotes: !title }
+          })
           .filter((x) => x.s > 0)
           .sort((a, b) => b.s - a.s)
           .slice(0, 7)
-        for (const { t } of topics) {
+        for (const { t, inNotes } of topics) {
           out.push({
             id: `topic-${t.id}`,
             group: 'Topics',
             label: t.title,
             lead: <ConfidenceGlyph value={t.confidence} />,
+            sub: inNotes ? 'Matches your notes' : undefined,
             course: data.courseById.get(t.courseId),
             run: go(`/app/topics/${t.id}`),
           })
